@@ -1,0 +1,54 @@
+ABACUS Version 3.0
+********************************
+
+Your help implementing new features 
+or removing bugs is very appreciated.
+
+There are several changes between the current version 3.0 and previous versions.
+
+The three main-modifications we worked on are: 
+
+************************************
+* COIN-OSI (Open Solver Interface) *
+************************************
+We modified ABACUS to work with COIN-OSI. 
+So there is no need to support any explicit Solver.
+COIN-OSI has a broad reach of Solver, 
+especial previous Solver used by ABACUS (Soplex,Cplex,Xpress) are supported.
+List of all currently supported Solver:
+ - Cbc	
+ - Clp	
+ - CPLEX	
+ - DyLP	
+ - FortMP	
+ - GLPK	
+ - MOSEK	
+ - OSL	
+ - SoPlex	
+ - SYMPHONY
+ - Vol	
+ - XPRESS-MP	
+(please visit https://projects.coin-or.org/Osi for further details)
+
+*************
+* Compilers *
+*************
+
+ABACUS can now be compiled with the GNU c++ compilers 3.3 - 4.1.
+
+
+*************************************
+* ABACUS Documentation with DOXYGEN *
+*************************************
+We changed the documentation tool from CWEB to DOXYGEN.
+It is now possible to build the reference manual in html format
+and the complete user's guide in pdf and html format.
+The complete documentation can also be accessed from the project website
+
+www.informatik.uni-koeln.de/abacus
+
+
+INSTALLATION
+======================
+Please read the INSTALL file in the main directory for detailed installation
+instructions.

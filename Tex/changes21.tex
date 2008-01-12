@@ -1,0 +1,335 @@
+\section{New Features of ABACUS 2.2}
+\label{section:new22}
+
+
+Version 2.2 includes a new interface to the Lp-Solver
+Xpress and Cplex 6.0 and it provides enhaced functionality
+for parameter handling.
+Moreover, the library is now available for different native compilers.
+It can be configured for any combination of supported LP-Solvers by the
+user.
+\ABACUS\ now intensively uses inline functions to improve performance.
+
+\subsection{Lp-Solver Xpress}
+
+In addition to the LP-Solvers Cplex and Soplex ABACUS now also provides
+an interface to the LP-Solver Xpress-MP Version 10.
+The Xpress libraries {\tt libxosl.a} and {\tt libmp-opt.a} have both to
+be linked.
+
+Xpress-MP is a commercial product by Dash Associates. You find further
+information about Xpress at
+\htmladdnormallink{{\tt http://www.dash.co.uk/}}{http://www.dash.co.uk/}.
+
+\subsection{Lp-Solver Cplex}
+
+Cplex 6.0 is now supported.
+
+In addition, a new parameter {\tt CplexHoldEnvironment} is introduced.
+If this parameter is true, then the Cplex environment 
+is held open during the branch-and-cut optimization.
+This reserves a Cplex license for the complete time of
+optimization.
+
+\subsection{Lp-Methods}
+
+\begin{sloppypar}
+The solution method for linear programs
+{\tt LP::Barrier} is replaced by the methods
+{\tt LP::BarrierAndCrossover} and {\tt LP::BarrierNoCrossover}.
+\end{sloppypar}
+
+\subsection{New Compilers}
+
+New supported compilers are the {\tt GNU C++ compiler gcc 2.8} and the
+{\tt Sun WorkShop Compiler C++ 4.2}. We now provide 32 and 64 bit versions
+of the \ABACUS\ library compiled with the {\tt SGI MIPSpro 7.2 C++ compiler}.
+
+\subsection{Library Architectures}
+
+The \ABACUS\ library is provided for different combinations of {\tt hardware},
+{\tt operating systems} and {\tt compilers}.
+These combinations are identified by an {\tt <arch>} name.
+Some architectures are shown in table \ref{table:arch}.
+\begin{table}[htp]
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Hardware & Operating System & Compiler & <arch>\\
+\hline
+SUN SPARC & SUN-OS 4.1.3 & GNU C++ Compiler 2.8.1 & sunos-gcc28 \\
+SUN SPARC & SUN-OS 5.6 & GNU C++ Compiler 2.8.1 & solaris-gcc28 \\
+SUN SPARC & SUN-OS 5.6 & GNU C++ Compiler 2.7.2 & solaris-gcc27 \\
+SUN SPARC & SUN-OS 5.6 & SUN WorkShop Compiler C++ 4.2 & solaris-CC \\
+IBM RS6000 & AIX 4.1.5 & GNU C++ Compiler 2.8.1 & aix4-gcc28 \\
+IBM RS6000 & AIX 4.1.5 & GNU C++ Compiler 2.7.2 & aix4-gcc27 \\
+DEC ALPHA & OSF 3.2 & GNU C++ Compiler 2.8.1 & osf-gcc28 \\
+DEC ALPHA & OSF 3.2 & GNU C++ Compiler 2.7.2 & osf-gcc27 \\
+SILICON GRAPHICS & Irix 6.2 & GNU C++ Compiler 2.7.2 & irix6-gcc27 \\
+SILICON GRAPHICS & Irix 6.2 & MIPSpro 7.2 C++ compiler 32 Bit,  & irix6-CCn32 \\
+& & mips4 & \\
+SILICON GRAPHICS & Irix 6.2 & MIPSpro 7.2 C++ compiler 64 Bit, & irix6-CC64 \\
+& & mips4 & \\
+HP 9000 & HP-UX 10.20 & GNU C++ Compiler 2.8.1 & hpux10-gcc28 \\
+PC & Linux 2.0.27 & GNU C++ Compiler 2.8.1 & linux20-gcc28 \\
+PC & Linux 2.0.27 & GNU C++ Compiler 2.7.2 & linux20-gcc27 \\
+PC & Windows NT & MS Visual C++ 5.0 & winnt \\
+\hline
+\end{tabular}
+\caption{Architecture names.}
+\label{table:arch}
+\end{center}
+\end{table}
+
+\subsection{Library Creation by the User}
+
+The library archive file {\tt abacus-<version>-<arch>.tar.gz} contains
+the basic \ABACUS\ library and libraries for each supported
+{\tt Interface} to an LP-Solver. Currently supported Interfaces are
+shown in table \ref{table:interfaces}.
+
+\begin{table}[htp]
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Interface name & LP-Solver\\
+\hline
+cplex22 &                       Cplex 2.2 \\
+cplex30 &                       Cplex 3.0 \\
+cplex40 &                       Cplex 4.0 \\
+cplex50 &                       Cplex 5.0 \\
+cplex60 &                       Cplex 6.0 \\
+soplex  &                       Soplex 1.0 \\
+xpress  &                       Xpress-MP 10 \\
+\hline
+\end{tabular}
+\caption{Interface names.}
+\label{table:interfaces}
+\end{center}
+\end{table}
+
+You can create \ABACUS\ libraries for any combination of supported
+LP-Solvers by yourself.
+Downloaded and unpack the library ditribution archive with the right
+<arch> in the installation root directiry (e.g. /usr/local/abacus).
+A directory {\tt abacus-<version/lib/<arch>/stuff} is created which
+contains all required files to build specific \ABACUS\ libraries.
+Then create LP-Solver specific ABACUS libraries by using the command
+{\tt make-lib} in the directory {\tt lib/<arch>} for any desired
+combination of different LP-solvers.
+
+For example if you want to have \ABACUS\ libraries for Solaris compiled
+with gcc 2.8 download the file {\tt abacus-2.2-solaris-gcc28.tar.gz}.
+\begin{verbatim}
+  gunzip abacus-2.2-solaris-gcc28.tar.gz
+  tar xvf abacus-2.2-solaris-gcc28.tar
+\end{verbatim}
+To create libraries with interfaces for Cplex 6.0, Soplex, Xpress and
+all three together type
+\begin{verbatim}
+  cd abacus-2.2/lib/solaris-gcc28
+  make-lib cplex60
+  make-lib soplex
+  make-lib xpress
+  make-lib cplex60-soplex-xpress
+\end{verbatim}
+The {\tt make-lib <interfaces>} command creates the file
+
+\centerline{{\tt abacus-<version>/lib/solaris-gcc28/libabacus-<interfaces>.a},}
+
+ where {\tt <interfaces>} is an
+interface string or a combination of interface strings concatenated by the
+character {\tt -}.
+
+\subsection{New or Changed Preprocessor Flags}
+
+A list of preprocessor flags with new or changed meaning follows:
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Preprocessor Flag & Meaning\\
+\hline
+ABACUS\_COMPILER\_GCC28     &       GNU C++ compiler 2.8 \\
+ABACUS\_COMPILER\_GCC27     &       GNU C++ compiler 2.7 \\
+ABACUS\_COMPILER\_GCC       &       defaults to ABACUS\_COMPILER\_GCC28 \\
+ABACUS\_COMPILER\_SUN       &       SUN WorkShop C++ Compiler 4.2 \\
+\hline
+ABACUS\_EXPLICIT\_TEMPLATES &       no longer needed \\
+ABACUS\_CPP\_MATH           &       no longer needed \\
+ABACUS\_SYS\_xxxxxx         &       no longer needed \\
+ABACUS\_LP\_SOPLEX          &       no longer needed \\
+ABACUS\_LP\_CPLEXxx         &       needed only if lpmastercplex.h
+                                  or cplexif.h is included. \\
+\hline
+\end{tabular}
+\end{center}
+
+See the updated Makefile of the TSP example in
+{\tt abacus-2.2/example/Makefile} for a description of the
+valid compiler and linker flags. This file also explains how to link
+an application with more than one LP solver.
+
+
+\subsection{Templates}
+\index{templates}
+
+It is no longer needed to include template definition files (*.inc). These
+files are now automatically included by the coresponding header files (*.h).
+
+If you are using gcc 2.8 no special flags for template instatiation need to be
+defined. If you are using gcc 2.7 we recommended to define the compilerflag
+{\tt -fno-implicit-templates} and to manually instantiate the templates
+which are needed, but not contained in the ABACUS library as described in
+section \ref{section:UsingTemplates}.
+
+
+\subsection{New LP Master Classes}
+
+There is a new abstract class {\tt ABA\_LPMASTER} and subclasses
+{\tt ABA\_LPMASTERCPLEX}, {\tt ABA\_LPMASTERSOPLEX} and {\tt ABA\_LPMASTERXPRESS}.
+These classes handle LP solver
+specific parameters and global data. As a consequence some LP solver specific
+functions which were located in ABA\_MASTER are now located in one of these
+classes. If you are using such a function you have to change your code as
+shown in the example below:
+\begin{verbatim}
+    master->cplexOutputLevel(level);
+\end{verbatim}
+should be changed to
+\begin{verbatim}
+    ABA_LPMASTERCPLEX *cplexMaster = master->lpMasterCplex();
+    lpMasterCplex->cplexOutputLevel(level);
+\end{verbatim}
+or simply
+\begin{verbatim}
+    master->lpMasterCplex()->cplexOutputLevel(level);
+\end{verbatim}
+
+\begin{sloppypar}
+The corresponding header files are {\tt abacus/lpmastercplex.h}, 
+{\tt abacus/lpmastersoplex.h}, and {\tt abacus/lpmasterxpress.h}.
+\end{sloppypar}
+
+\subsection{HTML Documentation}
+
+In the HTML version of the Reference Manual 
+(Section \ref{chapter:ReferenceManual}), we added links in
+the declaration part of the class which point to other classes
+and to the descriptions of the class members.
+
+
+\subsection{Parameter Handling}
+ 
+The system parameter table and the functions for handling parameters
+moved from class {\tt ABA\_MASTER} to its base class {\tt ABA\_GLOBAL}.
+Now, it is possible to use the parameter concept of \ABACUS\ even without
+generating an object of {\tt ABA\_MASTER}. (This might be useful when
+writing some experimental code using the Tools and Templates of
+\ABACUS, but not writting an complete \bac-application.)
+
+In addition to the overloaded functions {\tt ABA\_GLOBAL::getParameter()},
+ we now provide the overloaded functions {\tt ABA\_GLOBAL::assignParameter()}
+and {\tt ABA\_GLOBAL::findParameter()} with enhanched functionality.
+The
+new functions test for the existence of a parameter in the
+table, compare the current setting with feasible settings and allow
+for termination of the program if a 
+required paramter is not found, or if it is found but if its
+setting is not feasible.
+
+Moreover,  a \bac-optimization can be started without reading
+the parameter file {\tt .abacus}.
+
+See section~\ref{section:parameterHandling} for further details on
+using parameters.
+ 
+
+\subsection{Name changings}
+
+This version contains some changings of names that seemed
+reasonable to us. Most changings were guided by the principle
+that we want to have the feasible values of the 
+\ABACUS\ parameters coinciding with the 
+enumerators of the corresponding enumeration type.
+(As all enumerators in one class have to be different, an 
+exception to that rule is the parameter value {\ttfamily None}
+which is feasible for different paramaters.)
+
+In addition, we changed in general in {\ttfamily SoPlex} the upper 
+{\ttfamily P} to a lower one.
+
+\smallskip
+
+Table~\ref{table:namechangings21} summarizes the changings. We provide
+Perl scripts for performing the changings on your \ABACUS\ application.
+For a parameter file, use 
+\begin{verbatim}
+upd-parameter-2.2 <parameter-file>
+\end{verbatim}
+and apply
+\begin{verbatim}
+upd-sources-2.2 <code-filse>
+\end{verbatim}
+to your C++ code files.
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{c||c|c}
+Location&Old &New\\
+\hline
+Parameter {\tt EnumerationStrategy}&{\tt Best}&{\tt BestFirst}\\
+Parameter {\tt EnumerationStrategy}&{\tt Depth}&{\tt DepthFirst}\\
+Parameter {\tt EnumerationStrategy}&{\tt Breadth}&{\tt BreadthFirst}\\
+{\tt ABA\_MASTER::PRIMALBOUNDMODE}&{\tt OptimalPrimalBound}&{\tt Optimum}\\
+{\tt ABA\_MASTER::PRIMALBOUNDMODE}&{\tt OptimalOnePrimalBound}&{\tt OptimumOne}\\
+{\tt ABA\_MASTER::VBCMODE}&{\tt None}&{\tt NoVbcLog}\\
+various &{\tt SoPlex}&{\tt Soplex}\\
+{\tt ABA\_LP::METHOD}&{\tt Barrier}&{\tt BarrierAndCrossover}\\
+\end{tabular}
+\caption{Name changings.}
+\label{table:namechangings21}
+\end{center}
+\end{table}
+
+\section{New Features of ABACUS 2.1}
+\label{section:new21}
+
+In version 2.1 we added a few new features, fixed some bugs, and
+improved the performance of some functions.
+ 
+
+ 
+\subsection{Elimination of Constraints and Variables}
+
+So far a constraint or variable was eliminated from the set of active
+items as soon as the criterion for elimination hold. Now the number of
+iterations the criterion must hold until the elimination is performed
+can be specified in the configuration file {\tt .abacus} (see
+Section~\ref{section:parameters}). 
+ 
+\subsection{Cplex 5.0}
+
+Cplex 5.0 is now supported by \ABACUS.
+
+\subsection{Templates}
+
+In addition to the explicit instantiation of templates, \ABACUS\ now
+also supports the implicit instantiation (see
+Section~\ref{section:UsingTemplates}). 
+
+
+\subsection{Bug Fixes}
+
+
+\subsubsection{Constraint and Variable Selection}
+
+The selection of constraints and variables with highest rank from the 
+buffers of generated constraints and variables is now performed
+correctly again.
+
+\subsubsection{Variable Generation}
+
+We have tested the dymanic variable generation of \ABACUS\ more
+intensively and could fix some so far unknown bugs.
+

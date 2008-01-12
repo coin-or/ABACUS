@@ -1,0 +1,81 @@
+A Simple TSP - Solver
+---------------------
+
+Author:  Stefan Thienel
+Version: 1.2 (July 2007) 
+         Updated for ABACUS 3.0, Mark Sprenger, Frank Baumann
+Version: 1.1 (September 1997) for ABACUS 2.0
+         Updated for ABACUS 2.2 (July 1998), Max Boehm, Thomas Christof
+
+The files in this directory implement a simple TSP-solver that shows
+how an ABACUS application can be implemented. The purpose of this
+program is not the fast solution of traveling salesman problem but
+to show some features of ABACUS. Together with the ABACUS manual this
+example should simplify the development of new ABACUS applications.
+
+Installation
+------------
+
+- Modify the Makefile according to your environment. 
+  There are comments in the Makefile with information how to set the variables.
+
+- call "make" to obtain an executable program tsp
+  (The CWEB tool ctangle must be installed)
+
+- call "make tsp.ps" to obtain a Postscript Version of the program
+  (In this case the CWEB tool cweave must be installed)
+
+
+Solving Traveling Salesman Problems
+-----------------------------------
+
+  call "tsp <filename>"
+
+  <filename> must be a problem instance in TSPLIB (see reference
+  [Rei91] in tsp.ps.) format with edge weight type EUC_2D. If
+  <filename> starts with "./" or "/" then the specified relative or
+  absolute  filename is taken. Otherwise <filename> is appended  the
+  value of the environment variable TSPLIB_DIR.
+
+
+List of Problem Instances
+-------------------------
+
+You can obtain test instances for the example program of the
+distribution from 
+http://www.iwr.uni-heidelberg.de/iwr/comopt/soft/TSPLIB95/TSPLIB.html
+
+Here are some problem instances taken from TSPLIB_DIR that have edge
+weight type EUC_2D and that can be solved already with this program in
+reasonable time. This solver is not designed for harder problem instances.
+
+berlin52.tsp
+bier127.tsp
+eil101.tsp
+eil51.tsp
+eil76.tsp
+lin105.tsp
+pr107.tsp
+rat99.tsp
+rd100.tsp
+st70.tsp
+
+
+
+Copyright Notice
+----------------
+
+Copyright (c) Universitaet zu Koeln
+
+Permission is granted to copy and modify the files of this example
+for the development of ABACUS applications. However, we ask all
+users to keep the original files of this example unmodified to keep it
+consistent everywhere in the world. Therefore, modification is only
+allowed if the modified file receives a new name.
+
+
+Warranty
+--------
+
+This program is distributed without any warranty. The entire risk is
+with its user.

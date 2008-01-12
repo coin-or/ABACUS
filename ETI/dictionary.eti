@@ -1,0 +1,3 @@
+#include "abacus/string.h"
+
+template class ABA_DICTIONARY<ABA_STRING, int> ;

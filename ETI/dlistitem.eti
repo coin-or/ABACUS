@@ -1,0 +1,6 @@
+class ABA_SUB;
+template class ABA_DLISTITEM<ABA_SUB*>;
+
+
+
+

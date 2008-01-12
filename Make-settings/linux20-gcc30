@@ -1,0 +1,16 @@
+#
+# Definitions for 
+#
+
+CCC = g++-3.0
+
+STRIP = strip -x
+
+# $(ARCHTECT) identifies the architecture and the operating system of 
+#  the target (i.e. solaris, sunos, linux, irix6, hpux10, aix4, winnt)
+ARCHTECT = linux20-gcc29
+
+CPLEXFLAGS      = -DCPX_PROTOTYPE_ANSI -DPROTOTYPE_MAX
+CCFLAG_SYS	= -DABACUS_SYS_LINUX
+CCFLAG_COMPILER	= -DABACUS_COMPILER_GCC29 -Wall
+CCFLAG_DEBOPT	= -O3

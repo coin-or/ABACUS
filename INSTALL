@@ -1,0 +1,70 @@
+Preconditions 
+=======================
+
+Before compiling ABACUS 3.0 make sure that COIN-OSI is installed.
+For more information on the installation of COIN-OSI see
+https://projects.coin-or.org/Osi
+
+To build the documentation several auxiliary programs are needed:
+
+- cweave and ctangle for the tsp-example 
+- doxygen and latex for the reference manual and user guide 
+- tex4ht (actually the debian tex4ht package) for the html version
+  of the user guide
+
+
+Installation 
+========================
+
+Set the paths at the top of the Makefile to the include directories of
+COIN-OSI and the LP solvers installed on your system.
+
+Settings for different compilers are stored in the directory
+Make-settings. Which settings file is used is determined by the variable
+ABACUS_MAKE_SETTINGS. To compile ABACUS with g++-4.1, for example, do:
+
+make abacus ABACUS_MAKE_SETTINGS=linux20-gcc41
+
+To install abacus to a specific location instead of the base directory
+set the variables ABACUS_INSTALL_LIBDIR and ABACUS_INSTALL_HEADERDIR in
+the Makefile and run, for example:
+
+make install ABACUS_MAKE_SETTINGS=linux20-gcc41
+
+The environment variable ABACUS_DIR has to be set to the directory
+containing the general configuration file '.abacus'. A master version
+of this configuration file is provided in the base directory of the
+ABACUS distribution. It is recommended that every user makes a private
+copy of the file '.abacus' and sets ABACUS_DIR accordingly.
+
+To set the environment variable to /home/yourhome, for example, using
+the C-shell or its relatives, do: 
+
+setenv ABACUS_DIR /home/yourhome
+
+If the Bourne-shell is used do: 
+
+export ABACUS_DIR=/home/yourhome
+
+Usually it is convenient to add these instructions to the personal
+'.login' file.
+
+
+Documentation
+========================
+
+make doxygendoc
+   This produces the reference manual in html format in the subdirectory
+   html. The start page is html/index.html.
+
+make manual
+   This produces the complete user's guide and reference manual in pdf
+   format (manual.pdf).
+
+make manualhtml
+   This produces the complete user's guide and reference manual in
+   html format. The start page is manualhtml/manual.html.
+
+
+For more detailed installation instructions and information on environment
+variable settings, please read chapter 2 of the user's guide.

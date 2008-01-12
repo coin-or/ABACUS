@@ -1,0 +1,208 @@
+% $Id: introduction.tex,v 2.9 2007/08/14 15:13:25 baumann Exp $
+
+\chapter{Preface}
+
+\section*{Preface to Release 3.0}
+
+Major enhancements in \ABACUS~3.0 include the new solver interface to Osi, the ability to solve LPs with the Volume Algorithm and support for state-of-the-art GNU compilers. The documentation system has been changed from cweb to doxygen and the build process has been simplified.
+ABACUS~3.0 is released under the Gnu Lesser General Public License (LGPL). 
+See section~\ref{section:new30} for details. \newline
+We thank the members of Michael J\"unger's group for many stimulating
+discussions and valuable insights that helped improve the current
+release. Special thanks go to Christoph Buchheim, Frauke Liers,
+Thomas Lange (all University of Cologne) and Markus Chimani 
+(University of Dortmund).
+    
+
+\bigskip
+\bigskip\noindent
+{K\"oln, August 2007 \hfill {\it Frank Baumann}, {\it Mark Sprenger} and {\it Andrea Wagner}}\newline
+
+\section*{Preface to Release 2.3}
+
+ABACUS~2.3 is the first commercial release of
+\ABACUS\ distributed by the newly founded company Oreas GmbH. The
+changes made involve mainly some bug fixes and a new
+licensing mechanism, which allows to distribute also 30-days
+evaluation licenses.
+
+
+\bigskip
+\bigskip\noindent
+{K\"oln, December 1999 \hfill {\it Matthias Elf} and {\it Carsten
+Gutwenger}}\newline
+\smallskip
+{\hfill Oreas GmbH}
+
+
+
+\section*{Preface to Release 2.2}
+
+\ABACUS\ is a software system for the implementation of \lpbab\
+algorithms, i.e., \bac\ algorithms, \bap\ algorithms, and their
+combination. It applies the concepts of object oriented programming
+(programming language \CPLUSPLUS). An implementation of a problem
+specific algorithm is obtained by deriving some classes from abstract
+base classes of \ABACUS\ in order to embed problem specific functions.
+
+Based on our earlier work on non-object oriented branch-and-cut
+frameworks, Stefan Thienel developed \ABACUS~1.0 in his PhD thesis that
+was defended in December~1995. Since January~1996 he developed the
+public releases \ABACUS~1.2 to~2.1 with the partial support of 
+ESPRIT LTR Project no.\ 20244 (ALCOM-IT) and
+H.C.M.\ Institutional Grant no.\ ERBCHBGCT940710 (DONET).
+Stefan Thienel laid the foundations of \ABACUS\ with great dedication
+and enthusiasm. We regret that he decided to leave the Universit\"at zu
+K\"oln in spring~1998. Very much to our satisfaction, Max B\"ohm and
+Thomas Christof immediately took over the responsibility for
+\ABACUS. We are very glad that \ABACUS\ is again in competent hands and future
+development and maintenance is guaranteed.
+
+\bigskip
+\bigskip\noindent
+{K\"oln, August 1998 \hfill {\it Michael J\"unger}}\newline
+\smallskip
+{Heidelberg, August 1998 \hfill {\it Gerhard Reinelt}}
+
+
+\medskip
+
+ABACUS~2.1 was left ready for release in February 1998 by Stefan Thienel.
+After Stefan Thienel left university and we
+took over the responsibility for \ABACUS, we decided
+not to release ABACUS~2.1, but to add some new features to the software.
+The major enhancements of the resulting version 2.2 are
+the interface to the LP solver Xpress
+and the compilation of \ABACUS\ with different native compilers. 
+In addition, we introduced some new functions for easier parameter
+handling and improved the HTML version of the Reference Manual.
+A complete presentation of all modifications can be found in
+Section~\ref{section:new22}.
+
+We are very grateful to Stefan Thienel for his efforts involved in
+the development, documentation and support of \ABACUS, and wish him
+the very best for his future. For the users of \ABACUS, we hope that
+this transition in responsibility will be almost invisible to them.
+
+
+\bigskip
+\bigskip\noindent
+{K\"oln, August 1998 \hfill {\it Max B\"ohm}}\newline
+\smallskip
+{Athens, GA, August 1998 \hfill {\it Thomas Christof}}
+
+
+
+\section*{Preface to Release 2.1}
+
+
+The main purpose of version 2.1 of \ABACUS\ is the provision of some
+bug fixes. However, there are also a few new features that are
+explained in Section~\ref{section:new21}.
+
+
+\bigskip
+\bigskip\noindent
+{K\"oln, February 1998 \hfill {\it Stefan Thienel}}
+
+
+\section*{Preface to Release 2.0}
+
+During its first year of public availability \ABACUS\ reached a rather
+active community of users, which is growing slowly but
+constantly. Many of them contributed to making \ABACUS\ more
+reliable. I want to thank all of them for their helpful feedback.
+In particular, I want to mention Max B\"ohm, who pointed me to several
+improvement possibilities.
+
+But not only the users worked with \ABACUS, also its development
+continued such that it is now ready for a second release. \ABACUS~2.0
+offers besides many minor extensions four major new features: 
+\begin{itemize}
+\item the interface to the new LP-solver SoPlex
+\item the support of the Visual \CPLUSPLUS\ compiler
+\item a generalized strong branching method
+\item increased safety against name collisions
+\end{itemize}
+In particular, I am very happy that the abstract LP-interface proved
+its usefulness during the integration of the LP-solver SoPlex. 
+Since the adaption of the framework to the Visual \CPLUSPLUS\ compiler
+could be performed, I am optimistic that also other compilers can be
+supported in the future.
+
+Users who want to upgrade from version~1.2.x find the new features and
+the differences to previous versions in Section~\ref{section:NewFeatures}.
+
+\bigskip
+\bigskip\noindent
+{K\"oln, August 1997 \hfill {\it Stefan Thienel}}
+
+\section*{Preface to Release 1.2}
+
+While the Chapters 1 to 4 of this manual are a user's guide describing
+the installation, design, and application of \ABACUS\, the last 
+chapter contains the reference manual.
+Chapter~\ref{chapter:installation} explains how \ABACUS\ is installed
+on your computer system and what hardware and software environment is
+required. In order to simplify the user understanding \ABACUS\
+I describe in Chapter~\ref{chapter:design} the design of the software
+framework. While I recommend to study in any case the basic concepts outlined
+in Section~\ref{section:DesignBasics} before beginning with the 
+implementation of an application, it should be sufficient to return
+to Section~\ref{section:DesignDetails} only for rather advanced
+usage. Also Chapter~\ref{chapter:UsingAbacus} is split into two
+sections. The first one, Section~\ref{section:UsingAbacusBasics},
+explains the first steps that have to be performed to implement an
+application. This section should be studied together with the example
+included in the \ABACUS\ distribution. The second one, 
+Chapter~\ref{section:UsingAbacusAdvanced}, shows how default strategies
+of \ABACUS\ can be modified and outlines some additional features
+of the system. The reference manual of 
+Chapter~\ref{chapter:ReferenceManual} is complemented by the index that
+simplifies finding a certain class or one of its members.
+
+This manual is both available in Postscript and HTML format.
+The HTML form turns out to be quite useful for finding members
+of the reference manual.
+
+This user's guide is not intended to teach the concepts of 
+\lpbab, but I assume that the reader of this manual and the user
+of \ABACUS\ is familiar with these algorithms. For an introduction
+to \bac\ I refer to \cite{JRT95}, for an introduction to \bap\
+algorithms I recommend to \cite{BJN97}. Both approaches are described
+in \cite{Thi95}.
+
+Moreover, I also assume that the user of \ABACUS\ is familiar with
+the concepts of object oriented programming.
+For the reader who is unexperienced in object oriented programming I refer to \cite{KM90} for
+a good brief introduction and to \cite{Boo94} for a detailed
+description. There are many books about the programming language
+\CPLUSPLUS. The classical introduction is \cite{Str93a}. Very
+useful reference manuals are \cite{ES92} and the current working
+paper of the \CPLUSPLUS\ standardization committee \cite{Iso95}.
+
+\ABACUS\ originates from the dissertation of its author \cite{Thi95}
+and has since then been tested, slightly modified and
+improved. Here, I would like to thank all initial testers, in
+particular Thomas Christof, Meinrad Funke, and Fran\c{c}ois Margot
+for their bug reports and helpful comments. I am very grateful to
+Joachim Kupke for carefully proofreading an earlier version. I also
+want to thank Denis Naddef, LMC-IMAG, Grenoble, France, for his
+hospitality while writing the major part of this manual.
+
+Despite these successful tests I consider \ABACUS\ still as an experimental
+system. 
+Therefore, feedback of the users is appreciated.
+Some parts of the user's guide were adapted from \cite{Thi95}, while
+the reference manual has been compiled for the first time. Therefore,
+I also encourage the reader to send me error reports and improvement
+suggestions for the user's guide and the reference manual.
+
+I am aware that neither the software nor its documentation is perfect,
+but I think it is time to dare a first public release.
+
+\bigskip
+\bigskip\noindent
+{Grenoble, August 1996 \hfill {\it Stefan Thienel}}
+
+

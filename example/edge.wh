@@ -1,0 +1,31 @@
+@q 1996 by Stefan Thienel @>
+
+@* EDGE.
+
+   As explained at the beginning each edge of the complete graph is
+   identified with a variable in the integer programming formulation
+   of the traveling salesman problem. Therefore, we derive the class
+   |EDGE| from the base class |ABA_VARIABLE| in order to store the two
+   end nodes of the edge.
+
+@(edge.h@>=
+#ifndef EDGE_H
+#define EDGE_H
+
+#include "abacus/variable.h"
+
+  class @[ EDGE : @,@, public ABA_VARIABLE @] { @/
+    public: @/
+      EDGE(ABA_MASTER *master, int tail, int head, double obj);
+      virtual ~EDGE();
+      int tail () const;
+      int head () const;
+
+    private: @/
+      int     tail_;  // the tail node of the edge
+      int     head_;  // the head node of the edge
+  };
+@#
+#endif  // |!EDGE_H|
+
+

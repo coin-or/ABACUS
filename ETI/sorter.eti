@@ -1,0 +1,3 @@
+class POOLSLOTREF;
+
+template class ABA_SORTER<int, double>;

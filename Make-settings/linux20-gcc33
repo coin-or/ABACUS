@@ -1,0 +1,28 @@
+#
+# Definitions for the following system
+#
+# Linux Debian 1:3.3.5-13
+#
+
+# gcc version 3.3.5
+CCC = g++-3.3
+
+STRIP = strip -x
+
+# output goes to default location
+# OUTPUTDIR = .
+
+# $(ARCHTECT) identifies the architecture and the operating system of 
+#  the target (i.e. solaris, sunos, linux, irix6, hpux10, aix4, winnt)
+ARCHTECT = linux20-gcc33
+
+CPLEXFLAGS      = -DCPX_PROTOTYPE_ANSI -DPROTOTYPE_MAX
+
+CCFLAG_SYS	= -DABACUS_SYS_LINUX
+CCFLAG_COMPILER	= -DABACUS_COMPILER_GCC33 -Wall
+CCFLAG_DEBOPT	= -O3
+CCFLAG_PARALLEL	= 
+
+# Do not blow up the object files with multiple template
+# instantiations of the same function.
+#CCFLAG_TEMPLATE = -fno-implicit-templates -DABACUS_TEMPLATES_EXPLICIT -IETI

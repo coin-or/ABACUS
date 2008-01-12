@@ -1,0 +1,54 @@
+\section{New Features of ABACUS 3.0}
+\label{section:new30}
+
+\subsection{Open Solver Interface}
+\index{Open Solver Interface}
+\index{Osi}
+
+\ABACUS\ now supports the {\tt Open Solver Interface (Osi)} developed by the 
+{\tt COIN-OR (COmputational INfrastructure for Operations Research)} project.
+All interface classes (|CPLEXIF|, |SOPLEXIF|, |XPRESSIF|) have been replaced by the single new class |OSIIF|.
+This change has the advantage that every solver supported by Osi can be used to solve LP relaxations.
+For the user only small modifications (if any) to existing code should be necessary.
+The setting of parameters for specific solvers now has to be implemented by the 
+user in the problem specific derived class using Osi functions.
+For this we provide a new virtual function |ABA\_MASTER::setSolverParameters()| that can be redefined by the user. 
+
+\subsection{Compilers}
+\index{compiler}
+\index{g++}
+
+New supported compilers are the {\tt GNU-\CPLUSPLUS\ } compilers {\tt g++ 3.3 - 4.1}. Support for some older compilers has been dropped. 
+
+\subsection{Library creation by the user}
+
+As there is now a single interface to all supported solvers, library creation is greatly simplified. Calling {\tt make} and {\tt make install} after adapting the {\tt Makefile} compiles the library {\tt libabacus-osi.a} and installs the header files to the specified location.
+
+\subsection{Documentation System}
+\index{doxygen}
+\index{documentation}
+The reference manual is now extracted directly from the {\tt c++} source files using the {\tt doxygen} documentation system. {\tt cweave} and {\tt ctangle} are no longer needed to compile the library.
+
+\subsection{Approximate solver}
+\index{approximate solver}
+\index{Volume Algorithm}
+
+\ABACUS\ now can use approximate instead of exact methods for solving LP relaxations. Currently, only the Volume Algorithm is supported, as it is the only approximate method provided by Osi. 
+The new parameter |SolveApprox| and the virtual function |ABA\_MASTER::solveApprox()| are provided to switch between exact and approximate solvers. 
+See Section~\ref{section:selectingLpMethod}, the reference manual and the example 
+included in the \ABACUS\ distribution for details.
+
+\subsection{Memory management}
+\index{memory management}
+
+The allocation and management of memory for the internal represantation of the LP is completely handled by Osi. The corresponding \ABACUS\ functions are kept only for compatibility reasons.
+
+\subsection{Preprocessor Flags and Include Paths}
+\index{include file path}
+
+A lot of preprocessor flags are no longer used. Especially the flag 
+{\tt ABACUS\_OLD\_INCLUDE} introduced in version 2.0 is obsolete.
+To include the array header file, for example, do:
+\begin{verbatim}
+#include "abacus/array.h"
+\end{verbatim}

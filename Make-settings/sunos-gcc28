@@ -1,0 +1,25 @@
+#
+# Definitions for the following system
+#
+# Target: sparc-sun-sunos4
+#
+# using gnu cross compiler
+
+# gcc 2.8
+CCC     = /scratch/rubens/gnu/bin/sparc-sun-sunos4-g++
+ARCHIVE = /scratch/rubens/gnu/bin/sparc-sun-sunos4-ar rc
+STRIP   = /scratch/rubens/gnu/bin/sparc-sun-sunos4-strip -x
+
+# output goes to default location
+# OUTPUTDIR = .
+
+# $(ARCHTECT) identifies the architecture and the operating system of 
+#  the target (i.e. solaris, sunos, linux, irix6, hpux10, aix4, winnt)
+ARCHTECT = sunos-gcc28
+
+CPLEXFLAGS      = -DSYSGNUSPARC
+
+CCFLAG_SYS	= -DABACUS_SYS_SUNOS4
+CCFLAG_COMPILER	= -DABACUS_COMPILER_GCC28 -Wall
+CCFLAG_DEBOPT	= -O3
+CCFLAG_PARALLEL	= 

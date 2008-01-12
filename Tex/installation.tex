@@ -1,0 +1,139 @@
+% E.g., $Id: installation.tex,v 2.8 2007/08/13 13:03:12 baumann Exp $
+
+
+
+\chapter{Installation}
+\label{chapter:installation}
+
+\section{Obtaining ABACUS}
+
+\ABACUS\ can be obtained from
+\begin{center}
+{\tt http://www.informatik.uni-koeln.de/abacus/} .
+\end{center}
+Please note that \ABACUS\ requires a working installation of the Open Solver Interface (Osi) provided by The Computational Infrastructure for Operations Research (COIN-OR) project. Please see Section~\ref{section:lpsolver} for details.
+If you have any questions about \ABACUS\, please send a mail to
+\begin{center}
+{\tt abacus@informatik.uni-koeln.de} .
+\end{center}
+
+\section{Platforms}\index{platforms}
+\label{section:platforms}
+
+\ABACUS\ is currently available for {\tt linux}.
+If you are interested in a version for another platform please contact us directly.
+
+\section{Building \ABACUS\ }
+\label{section:lpsolver}
+\index{Compiler}
+\index{build}
+\index{solver}
+
+\ABACUS\ can be compiled with the {\tt GNU-\CPLUSPLUS\ } compilers {\tt g++ 3.3.5 - 4.1.2}.
+
+\ABACUS\ provides a general interface to linear programming solvers.
+The current release supports the LP-solvers supported by COIN Osi version 0.96.
+Not all of them might be useful in combination with \ABACUS\, though.
+Before compiling ABACUS 3.0 make sure that COIN Osi is installed.
+For more information on the installation of COIN Osi see
+See \htmladdnormallink{{\tt https://projects.coin-or.org/Osi}}{https://projects.coin-or.org/Osi} for details.
+
+Set the paths at the top of the Makefile to the include directories
+of COIN Osi and the LP solvers installed on your system.
+
+Settings for different compilers are stored in the directory Make-settings.
+Which settings file is used is determined by the variable ABACUS\_MAKE\_SETTINGS.
+To compile ABACUS with g++-4.1, for example, do:
+
+make abacus ABACUS\_MAKE\_SETTINGS=linux20-gcc41
+
+To install abacus to a specific location instead of the base directory
+set the variables ABACUS\_INSTALL\_LIBDIR and ABACUS\_INSTALL\_HEADERDIR in
+the Makefile and run, for example:
+
+make install ABACUS\_MAKE\_SETTINGS=linux20-gcc41
+
+For information on how to produce the documentation, please run:
+
+make
+
+
+\section{Compiling and Linking}\index{Compiling}\index{Linking}
+\label{section:CompilingAndLinking}
+
+For compiling your files using \ABACUS\  add
+the {\tt abacus/include} directory either to your include directory
+path or specify it explicitly with the {\tt -I} compiler option.
+Furthermore, add the include file paths of the LP-solvers you want to use.
+The flag for the \CPLUSPLUS\ compiler can be defined at compilation time using 
+the {\tt -D} switch of the compiler (e.g., {\tt -DABACUS\_COMPILER\_GCC41})
+or specified in the {\tt Makefile}. See table ~\ref{table:compilers} for valid 
+settings.
+It might be helpful to consult the {\tt Makefile} of the example
+included in the \ABACUS\ distribution.
+
+\begin{table}[htp]
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+compiler preprocessor flags\\
+\hline
+Linux g++  4.1 & {\tt ABACUS\_COMPILER\_GCC41} or {\tt ABACUS\_COMPILER\_GCC} \\
+Linux g++  3.4 & {\tt ABACUS\_COMPILER\_GCC34} \\
+Linux g++  3.3 & {\tt ABACUS\_COMPILER\_GCC33} \\
+SUN C++ 4.2 & {\tt ABACUS\_COMPILER\_SUN} \\
+\hline
+\end{tabular}
+\caption{compilers}
+\label{table:compilers}
+\index{ABACUS\_COMPILER\_GCC@{\tt ABACUS\_COMPILER\_GCC}}
+\index{ABACUS\_COMPILER\_SUN@{\tt ABACUS\_COMPILER\_SUN}}
+\end{center}
+\end{table}     
+
+\section{Environment Variables}\index{environment variables}
+\label{section:env-variables}
+The environment variable 
+{\tt ABACUS\_DIR}\index{ABACUS\_DIR@{\tt ABACUS\_DIR}} has to be set to the directory
+containing the general configuration file {\tt .abacus}. A master version
+of this configuration file is provided in the base directory of the \ABACUS\ distribution.
+It is recommended that every user makes a private copy of the file {\tt .abacus} and sets
+{\tt ABACUS\_DIR} accordingly.
+
+To set the environment variable to {\tt /home/yourhome}, for example, using the C-shell 
+or its relatives, do:
+\begin{flushleft}
+\tt
+setenv ABACUS\_DIR /home/yourhome\\
+\end{flushleft}
+
+\noindent
+If the Bourne-shell is used do:
+\begin{flushleft}
+\tt
+export ABACUS\_DIR=/home/yourhome\\
+\end{flushleft}
+Usually it is convenient to add these instructions to the personal {\tt .login}
+file.
+
+\section{Contact}\index{contact}\index{bugs}
+
+Feedback from the users is highly appreciated. Please report your
+experiences and make your suggestions. Also comments on this user
+manual are appreciated. 
+Report all problems and suggestions by e-mail to:
+\begin{center}
+\tt
+abacus@informatik.uni-koeln.de
+\end{center}
+Before reporting a bug, please make sure that it does not come from an
+incorrect usage of the programming language \CPLUSPLUS.
+
+
+\section{Mailing List}\index{mailing list}\index{mailing list}
+There is a mailing list available for \ABACUS. 
+To subscribe to this service, please register at
+\begin{center} 
+\htmladdnormallink{{\tt https://lists.uni-koeln.de/mailman/listinfo/abacus-forum}}{https://lists.uni-koeln.de/mailman/listinfo/abacus-forum}
+.
+\end{center}

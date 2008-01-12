@@ -1,0 +1,77 @@
+@q 1996 by Stefan Thienel @>
+
+@* TSPMASTER.
+
+  The class |TSPMASTER| is derived from the abstract base class |MASTER|.
+  Its main purpose is the initialization of the pools with the problem
+  specific constraints and variable, the storage of the input data, and
+  the memorization of the best tour.
+
+@(tspmaster.h@>=
+
+#ifndef TSPMASTER_H
+#define TSPMASTER_H
+
+#include "abacus/master.h"
+
+class @[ TSPMASTER : @,@, public ABA_MASTER @] { 
+  public: @/
+    TSPMASTER(const char *problemName);
+    virtual ~TSPMASTER();
+    virtual ABA_SUB* firstSub();
+    int dist(int t, int h);
+    virtual void output();
+    void newSubTours(int n);
+    void updateBestTour(double *xVal);
+    int nNodes() const;
+    int nearestNeighbor(ABA_ARRAY<int> &succ);
+    bool setSolverParameters(OsiSolverInterface* interface, bool solverIsApprox);
+    int tailOffNLpVol() const;
+    double tailOffPercentVol() const;
+    double tailOffPercentExact() const;
+    void tailOffPercentExact(double percent);
+
+  private: @/
+    void readTsplibFile(const char *fileName);
+    virtual void initializeOptimization();
+    virtual void initializeParameters();
+
+    int nNodes_;         // the number of nodes of the problem instance
+    double *xCoor_;      // the $x$-coordinate of each node
+    double *yCoor_;      // the $y$-coordinate of each node
+    int nSubTours_;      // the number of generated subtour elimination constraints
+    int *bestSucc_;      // the successor of each node in the best know tour
+    bool showBestTour_;  // if |true|, the best tour is output finally
+    ABA_STRING clpPrimalColumnPivotAlgorithm_;  // the PCPA used by Clp
+    ABA_STRING clpDualRowPivotAlgorithm_;  // the DRPA used by Clp
+    int solverOutputLevel_; // the output level of the solver
+    ABA_STRING cplexPrimalPricing_;  // the primal pricing alg. used by CPLEX
+    ABA_STRING cplexDualPricing_;  // the dual pricing alg. used by CPLEX
+    // Parameters for the Volume Algorithm
+    int vol_ascentFirstCheck_;
+    int vol_ascentCheckInterval_;
+    int vol_printFlag_;
+    int vol_printInterval_;
+    int vol_greenTestInterval_;
+    int vol_yellowTestInterval_;
+    int vol_redTestInterval_;
+    int vol_alphaInt_;
+    int vol_maxSubGradientIterations_;
+    double vol_lambdaInit_;
+    double vol_alphaInit_;
+    double vol_alphaFactor_;
+    double vol_alphaMin_;
+    double vol_primalAbsPrecision_;
+    double vol_gapAbsPrecision_;
+    double vol_gapRelPrecision_;
+    double vol_granularity_;
+    double vol_minimumRelAscent_;
+    double tailOffPercentExact_;
+    double tailOffPercentVol_;
+    int tailOffNLpsVol_;
+
+    TSPMASTER(const TSPMASTER &rhs);  // definition omitted
+    const TSPMASTER &operator=(const TSPMASTER &rhs);  // definition omitted
+};
+
+#endif // |!TSPMASTER_H|

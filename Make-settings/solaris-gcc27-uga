@@ -1,0 +1,32 @@
+#
+# Settings for host nansen.cs.uga.edu
+# Obsolete after 9/98
+#
+
+PERL		= $(HOME)/bin/perl5
+GCP		= $(HOME)/bin/cp
+
+G++INCLUDE	=	/usr/local/lib/g++-include
+CCC   = g++
+MAKEDEPEND	= $(HOME)/kecechristof/bin/makedepend
+
+SOPLEX_INCLUDE	= -I/home/profs4/christof/kecechristof/soplex.1.0/soplex
+
+CCFLAG_SYS	= -DABACUS_SYS_SUNOS5
+CCFLAG_COMPILER	= -DABACUS_COMPILER_GCC27 -ansi -Wall
+CCFLAG_DEBOPT	= -ggdb 
+
+CCFLAG_TEMPLATE = -fno-implicit-templates -DABACUS_TEMPLATES_EXPLICIT -IETI		
+
+# $(ARCHTECT) identifies the architecture and the operating system of 
+#  the target (i.e. solaris, sunos, linux, irix63, hpux10, aix4, winnt)
+ARCHTECT = solaris
+
+#OUTPUTDIR  := $(shell pwd).out
+
+
+
+  
+
+
+

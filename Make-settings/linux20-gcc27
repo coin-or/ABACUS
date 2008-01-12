@@ -1,0 +1,28 @@
+#
+# Definitions for the following system
+#
+# Linux pittermaennche 2.0.27 #10 Fri May 30 00:05:59 MET DST 1997 i586 unknown
+#
+
+# gcc 2.7
+CCC = g++
+
+STRIP = strip -x
+
+# output goes to default location
+OUTPUTDIR = .
+
+# $(ARCHTECT) identifies the architecture and the operating system of 
+#  the target (i.e. solaris, sunos, linux, irix6, hpux10, aix4, winnt)
+ARCHTECT = linux20-gcc27
+
+CPLEXFLAGS      = -DCPX_PROTOTYPE_ANSI -DPROTOTYPE_MAX
+
+CCFLAG_SYS	= -DABACUS_SYS_LINUX
+CCFLAG_COMPILER	= -DABACUS_COMPILER_GCC27 -Wall
+CCFLAG_DEBOPT	= -O3
+CCFLAG_PARALLEL	= 
+
+# Do not blow up the object files with multiple template
+# instantiations of the same function.
+CCFLAG_TEMPLATE = -fno-implicit-templates -DABACUS_TEMPLATES_EXPLICIT -IETI

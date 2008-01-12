@@ -1,0 +1,108 @@
+% $Id: macros.tex,v 2.0 2007/06/15 11:47:29 sprenger Exp $
+
+\newcommand{\bab}{branch-and-bound}
+\newcommand{\bac}{branch-and-cut}
+\newcommand{\bap}{branch-and-price}
+\newcommand{\bacp}{branch-and-cut-and-price}
+\newcommand{\lpbab}{linear-programming based \bab}
+
+\newcommand{\tsp}{traveling salesman problem}
+\newcommand{\mip}{mixed integer optimization problem}
+\newcommand{\bcsp}{binary cutting stock problem}
+\newcommand{\gmip}{general \mip}
+\newcommand{\cop}{combinatorial optimization problem}
+
+\newcommand{\underscore}{\_}
+
+%\latex{
+  \font\abacusfont=cmssq8 scaled \magstep1
+  \newcommand{\ABACUS}{{\abacusfont ABACUS}}
+%}
+%\html{
+%  \newcommand{\ABACUS}{ABACUS}
+%}
+
+\newcommand{\CPLUSPLUS}{{C$++$}}
+\newcommand{\GPLUSPLUS}{{G$++$}}
+
+\newcommand{\BeginArg}{
+        \par\noindent Arguments:
+          \begin{quotation}
+          \noindent\ignorespaces
+}
+\newcommand{\EndArg}{
+        \end{quotation}
+}
+
+\newlength{\MyIndentUnit}
+\setlength{\MyIndentUnit}{\parindent}
+
+\newcommand{\BeginReturn}{\par\noindent Return Value:
+  \begin{quotation}
+  \noindent\ignorespaces
+}
+
+\newcommand{\EndReturn}{
+  \end{quotation}
+}
+  
+\newcommand{\BeginEnum}{
+  \begin{quotation}
+  \noindent\ignorespaces}
+
+\newcommand{\EndEnum}{
+  \end{quotation}
+}
+
+\newcommand{\BeginPureVirtual}{
+  \subsubsection{Pure Virtual Functions}
+}
+  
+
+\newcommand{\docarg}[2]{
+  #1
+  \begin{quotation}
+  \noindent #2
+  \end{quotation}
+}
+
+\newcommand{\clinebreak}{}  % only for compatibility with thesis
+                            % macros
+
+\newcommand{\docpar}{\par}
+
+\newcommand{\docmem}[2]{
+  \medskip
+  \docarg{#1}{#2}
+}
+
+\newcommand{\docpure}[2]{
+    \docmem{#1}{#2}
+}
+
+\newcommand{\parameter}[4]
+{\subsubsection{#1}
+ \index{#1@{\tt #1}}
+  #2
+ \par\smallskip\noindent\ignorespaces{Valid settings}:
+ \begin{quotation}
+ #3
+ \end{quotation}
+ \par\smallskip\noindent
+ {Default value}: #4
+}
+
+\newcommand{\parametervalue}[2]{
+   \par\smallskip\noindent\ignorespaces
+   \begin{tabular}{p{0.3\textwidth}lp{0.5\textwidth}}
+    \ignorespaces#1 & \hfill & #2 \\
+   \end{tabular}
+}
+
+\newcommand{\refindexpage}[1]
+        {\rm #1}
+
+
+
+\hyphenation{se-lect-Branch-ing-Vari-able-Can-di-dates}
+\hyphenation{Skip-Fac-tor}

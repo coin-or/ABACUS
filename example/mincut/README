@@ -1,0 +1,17 @@
+This directory contains a part of the MINCUT project of
+Michael Juenger, Giovanni Rinaldi, and Stefan Thienel.
+
+The *.c and *.h files have been generated from CWEB source files.
+As soon as the MINCUT project is finished, the authors will publish
+the original CWEB files. 
+
+Permission is granted to copy and modify the files. However, we ask all
+users to keep the original files of this example unmodified to keep it
+consistent everywhere in the world. Therefore, modification is only
+allowed if the modified file receives a new name.
+
+The authors tried its best to produce correct and useful programs, but
+there is no warranty. The entire risk is with its users.
+
+Copyright (c) 1996 by Michael Juenger, Giovanni Rinaldi and Stefan Thienel
+

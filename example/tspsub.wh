@@ -1,0 +1,40 @@
+@q 1996 by Stefan Thienel @>
+
+@* TSPSUB.
+
+  The class |TSPSUB| is derived from the abstract class |SUB| and implements
+  the problem specific functions for the optimization of a subproblem
+  (node of the branch-and-bound tree). In particular, this is the
+  feasibility test for a solution of the LP-relaxation and the 
+  separation of cutting planes.
+
+@(tspsub.h@>=
+
+#ifndef TSPSUB_H
+#define TSPSUB_H
+
+#include "abacus/sub.h"
+#include "abacus/tailoff.h"
+
+class TSPMASTER;
+class EDGE;
+
+  class @[ TSPSUB : @,@, public ABA_SUB @] { @/
+    public: @/
+      TSPSUB(ABA_MASTER *master, ABA_SUB *father, ABA_BRANCHRULE *branchRule);
+      TSPSUB(ABA_MASTER *master);
+      virtual ~TSPSUB();
+
+      virtual bool  feasible();
+      virtual ABA_SUB  *generateSon(ABA_BRANCHRULE *rule);
+      virtual int   separate();
+      double minCut(int &nCutNodes, int *cutNodes);
+      virtual bool solveApproxNow();
+
+    private: @/
+      TSPMASTER *tspMaster();
+      EDGE *edge(int i);
+      bool tailOffForVol_;
+  };
+
+#endif // |!TSPSUB_H|

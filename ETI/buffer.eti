@@ -1,0 +1,82 @@
+#include "abacus/vartype.h"
+#include "abacus/lpvarstat.h"
+#include "abacus/slackstat.h"
+#include "abacus/csense.h"
+
+class ABA_ROW;
+class ABA_SPARVEC;
+class ABA_COLUMN;
+class ABA_ROW;
+class ABA_FSVARSTAT;
+class ABA_VARIABLE;
+class ABA_SUB;
+class ABA_ROWCON;
+class ABA_BRANCHRULE;
+class ABA_STRING;
+class ABA_INFEASCON;
+class ABA_VARTYPE;
+class ABA_CONSTRAINT;
+class ABA_SROWCON;
+class ABA_CONVAR;
+template <class Type> class ABA_ARRAY;
+template<class BaseType, class CoType> class ABA_POOLSLOT;
+template<class BaseType, class CoType> class ABA_POOLSLOTREF;
+
+template class ABA_BUFFER<int>;
+template class ABA_BUFFER<long>;
+template class ABA_BUFFER<bool>;
+template class ABA_BUFFER<double>;
+template class ABA_BUFFER<ABA_SPARVEC*>;
+template class ABA_BUFFER<ABA_ROW*>;
+template class ABA_BUFFER<ABA_SLACKSTAT*>;
+template class ABA_BUFFER<ABA_LPVARSTAT*>;
+template class ABA_BUFFER<ABA_FSVARSTAT*>;
+template class ABA_BUFFER<ABA_COLUMN*>;
+template class ABA_BUFFER<ABA_VARIABLE *>;
+template class ABA_BUFFER<ABA_SUB *>;
+template class ABA_BUFFER<ABA_ROWCON *>;
+template class ABA_BUFFER<ABA_BRANCHRULE *>;
+template class ABA_BUFFER<ABA_STRING *>;
+template class ABA_BUFFER<ABA_VARTYPE>;
+template class ABA_BUFFER<ABA_INFEASCON*>;
+template class ABA_BUFFER<ABA_VARTYPE*>;
+template class ABA_BUFFER<ABA_CONSTRAINT*>;
+template class ABA_BUFFER<ABA_SROWCON*>;
+template class ABA_BUFFER<ABA_CONVAR*>;
+template class ABA_BUFFER<ABA_ARRAY<double> *>;
+template class ABA_BUFFER<ABA_BUFFER<int> *>;
+template class ABA_BUFFER<ABA_SLACKSTAT::STATUS>;
+template class ABA_BUFFER<ABA_LPVARSTAT::STATUS>;
+template class ABA_BUFFER<ABA_POOLSLOT<ABA_VARIABLE, ABA_CONSTRAINT> *>;
+template class ABA_BUFFER<ABA_POOLSLOT<ABA_CONSTRAINT, ABA_VARIABLE> *>;
+template class ABA_BUFFER<ABA_POOLSLOTREF<ABA_VARIABLE, ABA_CONSTRAINT> *>;
+template class ABA_BUFFER<ABA_POOLSLOTREF<ABA_CONSTRAINT, ABA_VARIABLE> *>;
+template class ABA_BUFFER<ABA_CSENSE::SENSE>;
+
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<int> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<long> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<bool> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<double> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_SPARVEC*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_ROW*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_SLACKSTAT*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_LPVARSTAT*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_FSVARSTAT*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_COLUMN*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_VARIABLE*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_SUB*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_ROWCON*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_BRANCHRULE*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_STRING*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_VARTYPE> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_INFEASCON*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_VARTYPE*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_CONSTRAINT*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_SROWCON*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_CONVAR*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_ARRAY<double>*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_BUFFER<int>*> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_LPVARSTAT::STATUS> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_SLACKSTAT::STATUS> &buffer);
+template class ostream& operator<<(ostream& out, const ABA_BUFFER<ABA_CSENSE::SENSE> &buffer);
+

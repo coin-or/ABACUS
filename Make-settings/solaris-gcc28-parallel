@@ -1,0 +1,45 @@
+#
+# Definitions for the following system
+#
+# Solaris 2.6, parallel ABACUS
+# rubens.informatik.uni-koeln.de
+
+# gcc 2.8
+CCC = g++
+
+#STRIP = /usr/ccs/bin/strip -x
+
+# output goes to default location
+# OUTPUTDIR = .
+
+# $(ARCHTECT) identifies the architecture and the operating system of 
+#  the target (i.e. solaris, sunos, linux, irix6, hpux10, aix4, winnt)
+ARCHTECT = solaris-gcc28-parallel
+
+CPLEXFLAGS      = -DSYSSOLARIS
+
+CCFLAG_SYS	= -DABACUS_SYS_SUNOS5
+# "-ansi" does not work with parallel version!
+CCFLAG_COMPILER	= -DABACUS_COMPILER_GCC28 -Wall
+#CCFLAG_DEBOPT	= -O3
+CCFLAG_PARALLEL	= 
+
+# parallel flags
+CCFLAG_PARALLEL	= -DABACUS_PARALLEL -D_REENTRANT -I/scratch/rubens/ACE/ACE_wrappers
+
+# do not remove the source sections of the parallel version
+CWEBFILTER_PARALLEL = cat
+
+
+ABACUS_PARALLEL_W =  parmaster.w id.w idmap.w intset.w dualbound.w \
+                     mtserver.w subserver.w notifyserver.w \
+                     messagebase.w message.w broadcast.w notification.w \
+                     balancer.w
+
+ABACUS_PARALLEL_WH = parmaster.wh id.wh idmap.wh intset.wh dualbound.wh \
+                     mtserver.wh subserver.wh notifyserver.wh \
+                     messagebase.wh message.wh broadcast.wh notification.wh \
+                     balancer.wh \
+                     debug.wh
+
+ABACUS_PARALLEL_WINC = idmap.winc

@@ -1,0 +1,29 @@
+#
+# Definitions for the following system
+#
+# Solaris 7
+# everest.iwr.uni-heidelberg.de
+
+# gcc 2.8
+CCC = g++
+
+STRIP = /usr/ccs/bin/strip -x
+G++INCLUDE = /usr/local/include/g++
+PERL       = /usr/local/bin/perl
+GCP        = /opt/FSFfutil/bin/cp
+
+
+# output goes to default location
+# OUTPUTDIR = .
+
+# $(ARCHTECT) identifies the architecture and the operating system of 
+#  the target (i.e. solaris, sunos, linux, irix6, hpux10, aix4, winnt)
+ARCHTECT = solaris-gcc28
+
+CPLEXFLAGS      = -DSYSSOLARIS
+
+CCFLAG_SYS	= -DABACUS_SYS_SUNOS5
+CCFLAG_COMPILER	= -DABACUS_COMPILER_GCC28 -Wall
+CCFLAG_DEBOPT	= -O3
+CCFLAG_PARALLEL	= 
+

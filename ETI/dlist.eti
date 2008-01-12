@@ -1,0 +1,4 @@
+class ABA_SUB;
+template class ABA_DLIST<ABA_SUB*> ;
+
+

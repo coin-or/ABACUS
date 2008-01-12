@@ -1,0 +1,60 @@
+@q 1996 by Stefan Thienel @>
+
+@* SUBTOUR.
+
+  This class implements the subtour elimination constraint for the
+  symmetric traveling salesman problem. Given a subset $W$
+  of the nodes set $V$ with 
+  $2 \le \vert W \vert \le \vert V \vert -2$, then the
+  subtour elimination constraint
+  $$ x(E(W)) \le \vert W \vert -1$$
+  must hold. As explained at the beginning this inequality has the
+  equivalent form $x(\delta(W)) \ge 2$. While we are using the first
+  format for adding the inequality to the linear programming relaxation,
+  the second format is used for the solution of the separation problem.
+
+  We represent the subtour elimination constraint by storing the nodes
+  of the set $W$. This format (compressed format) saves memory, 
+  but the computation
+  of the coefficient of variable requires $\hbox{O}(|W|)$ time. Therefore,
+  we provide a second format (expanded format) that uses more memory
+  but enables us to compute the coefficient of a variable in constant time
+  using $\hbox{O}(n)$ storage space. This expanded format is given
+  by an array of type |bool| that stores for each node if it is contained
+  in the set $W$ or not. The computation and the deletion of the expanded
+  format is done by redefining the virtual functions |expand()| and 
+  |compress()| of the base class |ABA_CONVAR|.
+
+  \ABACUS\ will automatically call the function |expand()| when
+  ``many'' coefficients of the constraint have to be computed and 
+  remove the expanded format by calling |compress()| when these computations
+  are done.
+  In general it is not required to redefine the functions |expand()|
+  and |compress()| but it might be useful depending on the storage
+  format of the constraint.
+
+@(subtour.h@>=
+#ifndef SUBTOUR_H
+#define SUBTOUR_H
+
+#include "abacus/constraint.h"
+
+  class @[ SUBTOUR : @,@, public ABA_CONSTRAINT @] { @/
+    public: @/
+      SUBTOUR(ABA_MASTER *master, int nNodes, int *nodes);
+      ~SUBTOUR();
+      virtual double coeff(ABA_VARIABLE *v);
+
+    private: @/
+      virtual void expand();
+      virtual void compress();
+
+      ABA_ARRAY<int>   nodes_;    // the nodes of the set $W$
+      bool        *marked_;   // array for the expanded format
+
+      SUBTOUR(const SUBTOUR &rhs);  // definition omitted
+      const SUBTOUR &operator=(const SUBTOUR &rhs);  // definition omitted
+  };
+@#
+#endif  // |!SUBTOUR_H|
+

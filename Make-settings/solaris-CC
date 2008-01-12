@@ -1,0 +1,48 @@
+#
+# Definitions for the following system
+#
+# Solaris 2.6
+# rubens.informatik.uni-koeln.de
+
+# SUN CC 5.0
+CCC     = /opt/SUNWspro/bin/CC
+
+# This substituion of ar also collects the neccessary template instantiation
+# objects in the directory ./Template.DB.
+ARCHIVE = /opt/SUNWspro/bin/CC -xar -o
+
+
+STRIP = /usr/ccs/bin/strip -x
+
+# output goes to default location
+# OUTPUTDIR = .
+
+# $(ARCHTECT) identifies the architecture and the operating system of 
+#  the target (i.e. solaris, sunos, linux, irix6, hpux10, aix4, winnt)
+ARCHTECT = solaris-CC
+
+CPLEXFLAGS      = -DSYSSOLARIS
+
+CCFLAG_SYS	= -DABACUS_SYS_SUNOS5
+CCFLAG_COMPILER	= -DABACUS_COMPILER_SUN
+CCFLAG_DEBOPT	= -O
+CCFLAG_PARALLEL	= 
+
+# Instantiates generated templates in the current compilation unit.
+# Generated templates are then made static.
+#CCFLAG_TEMPLATE = -instances=static
+
+# Instantiate all member functions when implicitly instantiating a class,
+# CCFLAG_TEMPLATE	= -template=wholeclass
+CCFLAG_TEMPLATE	= -pto
+
+# All Template instantiation objects are put in ./Template.DB by default.
+# They are put unstripped into the libraries. Therfore we strip the library
+# afterwards.
+ADDITIONAL_LIB_ALL = additional_lib_all
+additional_lib_all:
+	$(STRIP) $(OUTPUTDIR)/lib/$(ARCHTECT)/stuff/*.a
+
+ADDITIONAL_CLEAN = additional_clean
+additional_clean:
+	rm -rf Template.DB

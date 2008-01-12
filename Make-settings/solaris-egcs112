@@ -1,0 +1,26 @@
+#
+# Definitions for the following system
+#
+# Solaris 2.6
+# rubens.informatik.uni-koeln.de
+
+# gcc 2.8
+CCC = /scratch/rubens/egcs-1.1.2/bin/g++
+
+STRIP = /usr/ccs/bin/strip -x
+
+# output goes to default location
+# OUTPUTDIR = .
+
+# $(ARCHTECT) identifies the architecture and the operating system of 
+#  the target (i.e. solaris, sunos, linux, irix6, hpux10, aix4, winnt)
+ARCHTECT = solaris-egcs112
+
+CPLEXFLAGS      = -DSYSSOLARIS
+
+CCFLAG_SYS	= -DABACUS_SYS_SUNOS5
+CCFLAG_COMPILER	= -DABACUS_COMPILER_GCC28 -Wall
+CCFLAG_TIME	= -DTMS_UTIME_HZ=100
+CCFLAG_DEBOPT	= -O3
+CCFLAG_PARALLEL	= 
+

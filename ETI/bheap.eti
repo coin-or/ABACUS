@@ -1,0 +1,3 @@
+
+template class ABA_BHEAP<int, int>;
+template class ABA_BHEAP<int, double>;

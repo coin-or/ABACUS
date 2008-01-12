@@ -1,0 +1,241 @@
+% $Id: referencemanual.tex,v 2.5 2007/08/08 17:04:39 baumann Exp $
+
+\chapter{Reference Manual}
+\label{chapter:ReferenceManual}
+
+The reference manual covers only those classes and class members which
+are relevant for the user. Therefore, the declarations of the classes
+in this chapter contain only a subset of the actual members, e.g., 
+private members are usually not documented here. For some classes
+the copy constructor and/or assignment operator have not been defined,
+but the default copy constructor and/or assignment operator are not
+correct. In this case we declare this function and/or this operator
+as a private member of its class such that its invalid usage is
+detected already at compile time. In this reference manual this
+is documented by including the copy constructor and/or assignment
+operator in the private part of a function. Even if there are other
+private members of the class they are not documented here.
+
+This reference manual is automatically compiled from the source files
+of \ABACUS. The advantage of this method is that we can always provide
+an up to date version of the reference manual in future releases of
+the software. The major drawback of this procedure is that the lack
+of order of the functions in the current source files is reflected in
+the reference manual. In particular, there is a often a difference of the
+order of the member functions in the header of a class and in the 
+documentation. For this reason we added HTML  links in
+the declaration part of the class which point to other classes
+and to the descriptions of the class members.
+For a listing of all functions in lexicographical
+order we refer to  the index.
+
+
+At the end of the reference manual a list of all preprocessor flags is
+given.
+
+\section{Application Base Classes}
+
+In order to implement an \ABACUS\ application problem specific classes
+have to be derived from the classes {\tt ABA\_MASTER} and {\tt ABA\_SUB}. 
+\ABACUS\ provides already some non-abstract classes derived from the
+classes {\tt ABA\_CONSTRAINT} and {\tt ABA\_VARIABLE}, but if there is 
+application specific structure to be exploited, classes also have 
+to be derived from {\tt ABA\_VARIABLE} and {\tt ABA\_CONSTRAINT}.
+
+Some other classes are included in this section because they are base
+classes of the application base classes {\tt ABA\_MASTER}, {\tt ABA\_SUB},
+{\tt ABA\_CONSTRAINT} and {\tt ABA\_VARIABLE}. The class {\tt ABA\_ABACUSROOT} is a
+base class of every class of the system. The class {\tt ABA\_GLOBAL} is a 
+base class of the class {\tt ABA\_MASTER}. Common features of constraints
+and variables are embedded in the class {\tt ABA\_CONVAR}, from which the
+classes {\tt ABA\_CONSTRAINT} and {\tt ABA\_VARIABLE} are derived.
+
+\input class_a_b_a___a_b_a_c_u_s_r_o_o_t.tex
+
+\input class_a_b_a___g_l_o_b_a_l.tex
+
+\input class_a_b_a___m_a_s_t_e_r.tex
+
+\input class_a_b_a___s_u_b.tex
+
+\input class_a_b_a___c_o_n_v_a_r.tex
+
+\input class_a_b_a___c_o_n_s_t_r_a_i_n_t.tex
+
+\input class_a_b_a___v_a_r_i_a_b_l_e.tex
+
+\input class_a_b_a___l_p_s_o_l_u_t_i_o_n.tex
+
+\input class_a_b_a___s_e_p_a_r_a_t_o_r.tex
+
+\%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{System Classes}
+
+This section documents (almost) all internal system classes of
+\ABACUS. This classes are usually not involved in the derivation
+process for the implementation. However for retrieving special
+information (e.g., about the linear program) or for advanced usage
+we provide here a detailed documentation.
+
+\input class_a_b_a___o_p_t_s_e_n_s_e.tex
+
+\input class_a_b_a___c_s_e_n_s_e.tex
+
+\input class_a_b_a___v_a_r_t_y_p_e.tex
+
+\input class_a_b_a___f_s_v_a_r_s_t_a_t.tex
+
+\input class_a_b_a___l_p_v_a_r_s_t_a_t.tex
+
+\input class_a_b_a___s_l_a_c_k_s_t_a_t.tex
+
+\input class_a_b_a___l_p.tex
+
+\input class_a_b_a___o_s_i_i_f.tex
+
+\input class_a_b_a___l_p_s_u_b.tex
+
+\input class_a_b_a___l_p_s_u_b_o_s_i.tex
+
+\input class_a_b_a___l_p_m_a_s_t_e_r.tex
+
+\input class_a_b_a___l_p_m_a_s_t_e_r_o_s_i.tex
+
+\input class_a_b_a___b_r_a_n_c_h_r_u_l_e.tex
+
+\input class_a_b_a___s_e_t_b_r_a_n_c_h_r_u_l_e.tex
+
+\input class_a_b_a___b_o_u_n_d_b_r_a_n_c_h_r_u_l_e.tex
+
+\input class_a_b_a___v_a_l_b_r_a_n_c_h_r_u_l_e.tex
+
+\input class_a_b_a___c_o_n_b_r_a_n_c_h_r_u_l_e.tex
+
+\input class_a_b_a___p_o_o_l.tex
+
+\input class_a_b_a___s_t_a_n_d_a_r_d_p_o_o_l.tex
+
+\input class_a_b_a___n_o_n_d_u_p_l_p_o_o_l.tex
+
+\input class_a_b_a___p_o_o_l_s_l_o_t.tex
+
+\input class_a_b_a___p_o_o_l_s_l_o_t_r_e_f.tex
+
+\input class_a_b_a___r_o_w.tex
+
+\input class_a_b_a___c_o_l_u_m_n.tex
+
+\input class_a_b_a___n_u_m_c_o_n.tex
+
+\input class_a_b_a___r_o_w_c_o_n.tex
+
+\input class_a_b_a___n_u_m_v_a_r.tex
+
+\input class_a_b_a___s_r_o_w_c_o_n.tex
+
+\input class_a_b_a___c_o_l_v_a_r.tex
+
+\input class_a_b_a___a_c_t_i_v_e.tex
+
+\input class_a_b_a___c_u_t_b_u_f_f_e_r.tex
+
+\input class_a_b_a___i_n_f_e_a_s_c_o_n.tex
+
+\input class_a_b_a___o_p_e_n_s_u_b.tex
+
+\input class_a_b_a___f_i_x_c_a_n_d.tex
+
+\input class_a_b_a___t_a_i_l_o_f_f.tex
+
+\input class_a_b_a___h_i_s_t_o_r_y.tex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Basic Data Structures}
+
+This subsection documents various basic data structures which we have used
+within \ABACUS. They can also be used within an application. The
+templated basic data structures are documented in 
+Section~\ref{section:ReferenceTemplates}.
+
+\input class_a_b_a___s_p_a_r_v_e_c.tex
+
+\input class_a_b_a___s_e_t.tex
+
+\input class_a_b_a___f_a_s_t_s_e_t.tex
+
+\input class_a_b_a___s_t_r_i_n_g.tex
+
+\section{Templates}
+\label{section:ReferenceTemplates}
+
+Various basic data structures are available as templates within
+\ABACUS. For the instantiation of templates we refer to 
+Section~\ref{section:UsingTemplates}.
+
+\input class_a_b_a___a_r_r_a_y.tex
+
+\input class_a_b_a___b_u_f_f_e_r.tex
+
+\input class_a_b_a___l_i_s_t_i_t_e_m.tex
+
+\input class_a_b_a___l_i_s_t.tex
+
+\input class_a_b_a___d_l_i_s_t_i_t_e_m.tex
+
+\input class_a_b_a___d_l_i_s_t.tex
+
+\input class_a_b_a___r_i_n_g.tex
+
+\input class_a_b_a___b_s_t_a_c_k.tex
+
+\input class_a_b_a___b_h_e_a_p.tex
+
+\input class_a_b_a___b_p_r_i_o_q_u_e_u_e.tex
+
+\input class_a_b_a___h_a_s_h.tex
+
+\input class_a_b_a___d_i_c_t_i_o_n_a_r_y.tex
+
+\section{Tools}
+
+This section documents some tools for sorting objects, measuring time,
+and generating output.
+
+\input class_a_b_a___s_o_r_t_e_r.tex
+
+\input class_a_b_a___t_i_m_e_r.tex
+
+\input class_a_b_a___c_p_u_t_i_m_e_r.tex
+
+\input class_a_b_a___c_o_w_t_i_m_e_r.tex
+
+\input class_a_b_a___o_s_t_r_e_a_m.tex
+
+\section{Preprocessor Flags}
+\label{section:preprocessor}
+
+Table~\ref{table:preprocessor} summarizes all preprocessors flags that
+are relevant for \ABACUS-users.
+
+\begin{table}[htp]
+\begin{center}
+\newcommand{\cppflag}[1]{{\tt #1}\index{#1@{\tt #1}}}
+\begin{tabular}{|l|l|l|}
+\hline
+Flag & Description & See Section \\
+\hline
+\cppflag{ABACUS\_COMPILER\_GCC41} & GNU \CPLUSPLUS\ compiler 4.1.x &
+                                               \ref{section:CompilingAndLinking}  \\
+\cppflag{ABACUS\_COMPILER\_GCC34} & GNU \CPLUSPLUS\ compiler 3.4.x &
+                                               \ref{section:CompilingAndLinking}  \\
+\cppflag{ABACUS\_COMPILER\_GCC33} & GNU \CPLUSPLUS\ compiler 3.3.x &
+                                               \ref{section:CompilingAndLinking}  \\
+\cppflag{ABACUS\_COMPILER\_SUN} & SUN C++ compiler & 
+                                                \ref{section:CompilingAndLinking} \\
+\hline
+\end{tabular}
+\caption{Preprocessor Flags.}
+\label{table:preprocessor}
+\end{center}
+\end{table}

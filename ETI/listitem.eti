@@ -1,0 +1,9 @@
+
+class ABA_CONSTRAINT;
+class ABA_VARIABLE;
+template<class BaseType, class CoType> class ABA_POOLSLOT;
+
+template class ABA_LISTITEM<ABA_POOLSLOT<ABA_CONSTRAINT, ABA_VARIABLE> *>;
+template class ABA_LISTITEM<ABA_POOLSLOT<ABA_VARIABLE, ABA_CONSTRAINT> *>;
+
+

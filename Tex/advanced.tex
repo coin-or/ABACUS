@@ -1,0 +1,2061 @@
+% $Id: advanced.tex,v 2.4 2007/08/14 09:34:17 baumann Exp $
+
+\section{Advanced Features}
+\label{section:UsingAbacusAdvanced}
+
+In the previous section we described the first steps for the implementation
+of a \lpbab\ algorithm with \ABACUS. 
+Now, we present several advanced features of \ABACUS. We show how
+various built-in strategies can be used instead of the default
+strategies and how new problem specific concepts can be integrated.
+
+\subsection{Using other Pools}
+\label{section:otherPools}
+\index{pool!problem specific}
+
+\noindent
+By default, \ABACUS\ provides one variable pool, one constraint pool
+for constraints of the problem formulation, and another constraint pool
+for cutting planes. For certain applications the implementation of
+a different pool concept can be advantageous.
+Suppose we would like to provide two different pools for cutting planes
+for our application instead of our default cutting plane pool.
+These pools have to be declared in the class {\tt MYMASTER} and we also
+provide two public functions returning pointers to these pools.
+\begin{verbatim}
+  class MYMASTER : public ABA_MASTER {
+    public:
+      ABA_STANDARDPOOL<ABA_CONSTRAINT, ABA_VARIABLE> *myCutPool1() 
+      {
+          return myCutPool1_;
+      }
+      ABA_STANDARDPOOL<ABA_CONSTRAINT, ABA_VARIABLE> *myCutPool2() 
+      {
+        return myCutPool2_;
+      }
+    private:
+      ABA_STANDARDPOOL<ABA_CONSTRAINT, ABA_VARIABLE> *myCutPool1_;
+      ABA_STANDARDPOOL<ABA_CONSTRAINT, ABA_VARIABLE> *myCutPool2_;
+  };
+\end{verbatim}
+Now, instead of the default cutting plane pool we set up our two 
+problem specific cut 
+pools in the 
+function~{\tt initializeOptimization()}\index{ABA\_MASTER@{\tt ABA\_MASTER}!initialiyeOptimization@{\tt initializeOptimization}}. This is done
+by using 0 as last argument of the function 
+{\tt initialize\-Pools()}\index{ABA\_MASTER@{\tt ABA\_MASTER}!initializePools@{\tt initializePools}}, which
+sets the size of the default cut pool to 0. The size of the variable pool is chosen
+arbitrarily. Then, we
+allocate the memory for our pools. For simplification, we suppose
+that the size of each cut pool is 1000.
+\begin{verbatim}
+  void MYMASTER::initializeOptimization()
+  {
+    // initialize the constraints and variables
+    initializePools(constraints, variables, 3*variables.number(), 0);
+
+    myCutPool1_ = new ABA_STANDARDPOOL<ABA_CONSTRAINT, ABA_VARIABLE>(this, 1000);
+    myCutPool2_ = new ABA_STANDARDPOOL<ABA_CONSTRAINT, ABA_VARIABLE>(this, 1000);
+  }
+\end{verbatim}
+The following redefinition of the function {\tt separate()} shows how
+constraints can be separated from and added to our pools instead of the
+default cut pool. If a pointer to a pool is specified as an argument of the
+function {\tt constraintPoolSeparation()}, then constraints are regenerated
+from this pool instead of the default cut pool. By specifying a constraint
+pool as the second argument of the function {\tt addCons()} the constraints
+are added to this pool instead of the default cut pool. As the member
+{\tt master\_} of the base class {\tt ABA\_SUB} is a pointer to an object
+of the class {\tt ABA\_MASTER} we require an explicit cast to call the member
+functions {\tt myCutPool1()} and {\tt myCutPool2()} of the class 
+{\tt MYMASTER}.
+\index{ABA\_MASTER@{\tt ABA\_MASTER}!separate{\tt separate}}
+\index{ABA\_MASTER@{\tt ABA\_MASTER}!constraintPoolSeparation@{\tt constraintPoolSeparation}}
+\index{pool!separation}
+\begin{verbatim}
+  int MYSUB::separate()
+  {
+    ABA_BUFFER<ABA_CONSTRAINT*> newCuts(master_, 100);
+    int nCuts = constraintPoolSeparation(0, ((MYMASTER*) master_)->myCutPool1());
+    if (!nCuts) {
+      nCuts = mySeparate1(newCuts);
+      if (nCuts) nCuts = addCons(newCuts, ((MYMASTER*) master_)->myCutPool1());
+    }
+    if (!nCuts) {
+      nCuts = constraintPoolSeparation(0, ((MYMASTER*) master_)->myCutPool2());
+      if (!nCuts) {
+        nCuts = mySeparate2(newCuts);
+        if (nCuts) nCuts = addCons(newCuts, ((MYMASTER*) master_)->myCutPool2());
+      }
+    }
+    return nCuts;
+  }
+\end{verbatim}
+Using application specific variable pools can be done in an analogous
+way with the two functions {\tt variablePoolSeparation()}
+and {\tt addVars()}.
+
+\subsection{Pool without Multiple Storage of Items}
+\label{section:nonduplpool}
+\index{pool!no multiple storage}
+
+One of the data structures using up very large parts of the memory are
+the pools for constraints and variables. Limiting the size of the pool
+has two side effects. First, pool separation or pricing is less
+powerful with a small pool. Second, the \bab\ tree might be processed
+with reduced speed, since subproblems cannot be initialized with
+the constraint and variable system of the father node. 
+
+On the other hand it can be observed that the same constraint or
+variable is generated several times in the course of the optimization.
+This could be avoided by scanning completely the pool before separating
+or pricing from scratch. But, if direct separation or pricing are
+fast, such a strategy can be less advantageous.
+
+Therefore \ABACUS\ provides the template class 
+{\tt ABA\_NONDUPLPOOL}\index{ABA\_NONDUPLPOOL@{\tt ABA\_NONDUPLPOOL}}
+that avoids storing the same
+constraint or variable more than once in a pool. More precisely,
+when an item is inserted in such a pool, the inserted item is compared
+with the already available items. If it is already present in the
+pool, the inserted item is deleted and replaced by the already
+available item.
+
+In order to use this pool, you have to set up your own pool as
+explained in Section~\ref{section:otherPools}. Instead of a
+{\tt ABA\_STANDARDPOOL} you have to use now an {\tt ABA\_NONDUPLPOOL}. 
+For constraints or variables that are inserted in a pool of the
+template class {\tt ABA\_NONDUPLPOOL}, the virtual functions {\tt hashKey},
+{\tt name}, and {\tt equal} of the base class {\tt ABA\_CONVAR} have to be
+redefined. These functions are used in the comparison of a new item and
+the items that are already stored in the pool. For the details of
+these functions we refer to the reference manual.
+
+
+\subsection{Constraints and Variables}
+\index{constraint}
+\index{variable}
+
+We discussed the concept of expanding and compressing constraints
+and variables already in
+Section~\ref{section:ConstraintsAndVariables}. 
+\index{constraint!compressed format}\index{constraint!expanded format}
+\index{variable!compressed format}\index{variable!expanded format}
+This feature can be activated
+for a specific constraint or variable class if the virtual dummy functions
+{\tt expand()}\index{ABA\_CONVAR@{\tt ABA\_CONVAR}!expand@{\tt expand}}
+and {\tt compress()}\index{ABA\_CONVAR@{\tt ABA\_CONVAR}!compress@{\tt compress}}
+are redefined. Here we give an
+example for constraints, but it can be applied to variables analogously.
+We discussed the expanded and compressed format of the subtour elimination
+constraints\index{subtour elimination constraint}
+already in Section~\ref{section:DesignDetails}. 
+The nodes defining the subtour
+elimination constraint are
+contained in the buffer {\tt nodes\_}. When the constraint is expanded 
+each node of the subtour elimination constraint is marked.
+\begin{verbatim} 
+  void SUBTOUR::expand()
+  {
+    if(expanded()) return;
+    marked_ = new bool[graph_->nNodes() + 1];
+    int nGraph = graph_->nNodes();
+    for (int v = 1; v <= nGraph; v++)
+      marked_[v] = false;
+    int nNodes = nodes_.size();
+    for (int v = 0; v < nNodes; v++)
+      marked_[nodes_[v]] = true;
+  }
+\end{verbatim}
+For the compression of the constraint only the allocated memory is
+deleted.
+\begin{verbatim}
+  void SUBTOUR::compress()
+  {
+    if (!expanded()) return;
+    delete marked_;
+  }
+\end{verbatim}
+
+\subsubsection{Constraints}
+\index{constraint}
+
+Often, the definition of constraint specific expanded and compressed
+formats provides already sufficiently efficient running times for the
+generation of the row format, the computation of the slack of a given
+LP-solution, or the check if the constraint is violated.
+
+If nevertheless further tuning is required, then the functions
+{\tt genRow()}\index{ABA\_CONSTRAINT@{\tt ABA\_CONSTRAINT}!genRow@{\tt genRow}} and 
+{\tt slack()}\index{ABA\_CONSTRAINT@{\tt ABA\_CONSTRAINT}!slack@{\tt slack}} can be redefined.
+The function
+\begin{verbatim}
+  virtual int genRow(ABA_ACTIVE<ABA_VARIABLE, ABA_CONSTRAINT> *variables, 
+                     ABA_ROW &row);
+\end{verbatim}
+\noindent
+stores the row format associated with the variable set {\tt variables} in {\tt row}
+and returns the number of nonzero coefficients stored in {\tt row}.
+
+The function
+\begin{verbatim}
+  virtual double slack(ABA_ACTIVE<ABA_VARIABLE, ABA_CONSTRAINT> *variables, 
+                       double *x);
+\end{verbatim}
+\noindent
+returns the slack of the vector {\tt x} associated with the variable set 
+{\tt variables}. Instead of redefining the function {\tt violated()} 
+due to performance issues, the function {\tt slack()} should be redefined because
+this function is called from the function {\tt violated()} and uses most of the joint
+running time.
+
+\subsubsection{Variables}
+\index{variable}
+
+The equivalents of the class {\tt ABA\_VARIABLE} to the functions {\tt genRow()}
+and {\tt slack()} of the class {\tt ABA\_CON\-STRAINT} are the functions
+{\tt genColumn()}\index{ABA\_VARIABLE@{\tt ABA\_VARIABLE}!genColumn@{\tt genColumn}}
+and {\tt redCost()}\index{ABA\_VARIABLE@{\tt ABA\_VARIABLE}!redCost@{\tt redCost}}. 
+Also for these two functions
+a redefinition due to performance reasons can be considered if the
+expansion/compression concept is not sufficient or cannot be applied.
+
+The function 
+\begin{verbatim}
+  virtual int genColumn(ABA_ACTIVE<ABA_CONSTRAINT, ABA_VARIABLE> *constraints,
+                        ABA_COLUMN &col);
+\end{verbatim}
+\noindent
+stores the column format of the variable associated with the constraint
+set {\tt constraints} in the argument {\tt col} and returns the number of nonzero coefficients
+stored in {\tt col}.
+
+The function
+\begin{verbatim}
+  virtual double redCost(ABA_ACTIVE<ABA_CONSTRAINT, ABA_VARIABLE> *constraints,
+                         double *y);
+\end{verbatim}
+\noindent
+returns the reduced cost of the variable corresponding to the dual variables
+{\tt y} of the active constraints {\tt constraints}.
+As a redefinition of the virtual member
+function {\tt slack()} of the class~{\tt ABA\_CONSTRAINT}
+might speed up the 
+function {\tt violated()}\index{ABA\_CONSTRAINT@{\tt ABA\_CONSTRAINT}!violated@{\tt violated}}, 
+also a redefinition
+of the function {\tt redCost()} can speed up the 
+function {\tt violated()}\index{ABA\_VARIABLE@{\tt ABA\_VARIABLE}!violated@{\tt violated}}
+of the class {\tt ABA\_VARIABLE}.
+
+\subsection{Infeasible Linear Programs}
+\index{linear program!infeasible}
+
+As long as we do not generate variables dynamically, a subproblem can be
+immediately fathomed if the LP-relaxation is infeasible.
+However, if not all variables are active we have to check if the addition
+of an inactive variable can restore the feasibility. 
+An infeasibility can either be detected when the linear program is
+set up, or later by the LP-solver (see~\cite{Thi95}).
+
+If fixed and set variables are eliminated, it might happen 
+when the row format of a constraint is generated in the initialization
+of the linear program that a constraint has a void
+left hand side but can never be satisfied due to its right hand side. 
+In this case, the function\index{ABA\_SUB@{\tt ABA\_SUB}!initMakeFeas@{\tt initMakeFeas}}
+\begin{verbatim}
+  virtual int initMakeFeas(ABA_BUFFER<ABA_INFEASCON*> &infeasCon,
+                           ABA_BUFFER<ABA_VARIABLE*> &newVars,
+                           ABA_POOL<ABA_VARIABLE, ABA_CONSTRAINT> **pool);
+\end{verbatim}
+\noindent
+is called. The default implementation always returns 1 to indicate
+that no variables could be added to restore feasibility. If it might
+be possible that in our application the addition of variables could
+restore the feasibility, then this function has to be redefined in
+a derived class.
+
+The buffer {\tt infeasCon} stores pointers to objects storing the infeasible
+constraints and the kind of infeasibility. The new variables should
+be added to the buffer {\tt newVars}, and if the variables should be
+added to an other pool than the default variable pool, then a pointer to this pool should
+be assigned to {\tt *pool}. If variables have been added that could
+restore the feasibility for all infeasible constraints, then the function
+should return 0, otherwise it should return 1.
+
+If an infeasible linear program is detected by the LP-solver, then
+the function\index{ABA\_SUB@{\tt ABA\_SUB}!makeFeasible@{\tt makeFeasible}}
+\begin{verbatim}
+  virtual int makeFeasible();
+\end{verbatim}
+\noindent
+is called. The default implementation of the virtual dummy function
+does nothing except returning 1 in order to indicate that the
+feasibility cannot be restored. Otherwise, an iteration of the dual
+simplex method has to be emulated according to the algorithm outlined
+in \cite{Thi95}. 
+When the function is called it is guaranteed that the current basis is 
+dual feasible. Exactly one of the member variables {\tt infeasVar\_} or
+{\tt infeasCon\_} of the class {\tt ABA\_SUB} is nonnegative. If {\tt infeasVar\_}
+is nonnegative, then it holds the number of an infeasible variable, if
+{\tt infeasCon\_} is nonnegative, then it holds the number of an infeasible
+slack variable. The array {\tt bInvRow\_} stores the row of the basis inverse
+corresponding to the infeasible variable (only basic variables can be
+infeasible). Then the inactive variables have to be scanned like
+in the function {\tt pricing()}. Variables that might restore the 
+feasibility have to be added by the function {\tt addCons()}. If no such
+candidate is found the subproblem can be fathomed.
+
+\subsection{Other Enumeration Strategies}
+\index{enumeration strategies}
+
+With the parameter 
+{\tt EnumerationStrategy}\index{EnumerationStrategy@{\tt EnumerationStrategy}}
+in the file {\tt .abacus}
+the enumeration strategies best-first search, breadth-first search,
+depth-first search, and a diving strategy can be controlled 
+(see Section~\ref{section:parameters}). 
+Another problem specific enumeration strategy can be implemented by
+redefining
+the virtual function\index{ABA\_MASTER@{\tt ABA\_MASTER}!enumerationStrategy@{\tt enumerationStrategy}}
+\begin{verbatim}
+  virtual int enumerationStrategy(ABA_SUB *s1, ABA_SUB *s2);
+\end{verbatim}
+which compares the two subproblems {\tt s1} and {\tt s2} and
+returns 1 if the subproblem {\tt s1} should be processed before {\tt s2},
+returns $-1$ if the subproblem {\tt s2} should be processed before {\tt s1},
+and returns 0 if the two subproblems have the same precedence in the
+enumeration.
+
+We provide again an implementation of the depth-first search strategy as
+an example for a reimplementation of the function {\tt enumerationStrategy()}.
+\begin{verbatim}
+  int MYMASTER::enumerationStrategy(ABA_SUB *s1, ABA_SUB *s2)
+  {
+    if(s1->level() > s2->level()) return  1;
+    if(s1->level() < s2->level()) return -1;
+    return 0;
+   }
+\end{verbatim}
+
+In the default implementation of the depth-first search strategy
+we do not return 0 immediately if the two subproblems have the same
+level in the enumeration tree, but we call the virtual 
+function\index{ABA\_MASTER@{\tt ABA\_MASTER}!equalSubCompare@{\tt equalSubCompare}}
+\begin{verbatim}
+  int ABA_MASTER::equalSubCompare(ABA_SUB *s1, ABA_SUB *s2);
+\end{verbatim}
+\noindent
+which return 0 if both subproblems have not been generated by
+setting a binary variable. Otherwise, that
+subproblem has higher priority where the branching variable is set to the
+upper bound, i.e., it returns 1 if the branching variable of {\tt s1} is 
+set to the upper bound, $-1$ if the branching variable of {\tt s2} is set to
+the upper bound, and 0 otherwise.
+Other strategies for resolving equally good subproblems for the built-in 
+enumeration strategies depth-first search and best-first search
+can be implemented by a redefinition of this virtual function.
+Moreover, this function can also be generalized for other enumeration
+strategies.
+
+\subsection{Selection of the Branching Variable}
+\index{branching variable}
+\noindent
+The default branching variable selection strategy can be changed
+by the redefinition of the virtual 
+function\index{ABA\_SUB@{\tt ABA\_SUB}!selectBranchingVariable@{\tt selectBranchingVariable}}
+\begin{verbatim}
+  int ABA_SUB::selectBranchingVariable(int &variable);
+\end{verbatim}
+\noindent
+in a class derived from the class {\tt ABA\_SUB}. If a branching variable
+is found it has to be stored in the argument {\tt variable} and the
+function should return 0. If the function fails to find a branching
+variable, it should return~1. Then, the subproblem is automatically
+fathomed.
+
+Here we present an example where the first fractional variable
+is chosen as branching variable. In general, this is not a very
+good strategy.
+\begin{verbatim}
+  int MYSUB::selectBranchingVariable(int &variable)
+  {
+    for (int i = 0; i < nVar(); i++)
+      if (fracPart(xVal_[i]) > master_->machineEps()) {
+        variable = i;
+        return 0;
+      }
+  
+    return 1;
+  }
+\end{verbatim}
+The function {\tt fracPart(double x)} returns the absolute value
+of the fractional part of {\tt x}.
+
+\subsection{Using other Branching Strategies}
+\label{section:otherBranching}
+\index{branching!problem specific strategies}
+
+Although branching on a variable is often an adequate strategy for
+\bac\ algorithms, it is in general useless for \bap\ algorithms.
+But also for \bac\ algorithms other branching strategies, e.g.,
+branching on a constraint can be interesting alternatives.
+
+For the implementation of different branching strategies we have
+introduced the concept of branching rules in the class 
+{\tt ABA\_BRANCHRULE} (see Section~\ref{section:DesignBranching}).
+The virtual function
+\index{ABA\_SUB@{\tt ABA\_SUB}!generateBranchRules@{\tt generateBranchRules}}
+\begin{verbatim}
+  int ABA_SUB::generateBranchRules(ABA_BUFFER<ABA_BRANCHRULE*> &rules);
+\end{verbatim}
+\noindent
+returns 0 if it can generate branching rules and stores for each
+subproblem, that should be generated, a branching rule in the buffer
+{\tt rules}. If no branching rules can be generated, this function
+returns 1 and the subproblem is fathomed.
+The default implementation of the function {\tt generateBranchRules()}
+generates two rules for two new subproblems by branching on a variable.
+These rules are represented by the classes 
+{\tt ABA\_SETBRANCHRULE}\index{ABA\_SETBRANCHRULE@{\tt ABA\_SETBRANCHRULE}} for
+binary variables and {\tt ABA\_BOUNDBRANCHRULE}\index{ABA\_BOUNDBRANCHRULE@{\tt ABA\_BOUNDBRANCHRULE}}
+for integer variables, which
+are derived from the abstract class {\tt ABA\_BRANCHRULE}\index{ABA\_BRANCHRULE@{\tt ABA\_BRANCHRULE}}.
+Moreover, we provide also rules for branching on constraints
+({\tt ABA\_CONBRANCHRULE}\index{ABA\_CONBRANCHRULE@{\tt ABA\_CONBRANCHRULE}}), 
+and for branching by setting an integer variable
+to a fixed value ({\tt ABA\_VALBRANCHRULE}\index{ABA\_VALBRANCHRULE@{\tt ABA\_VALBRANCHRULE}}).
+Other branching rules have
+to be derived from the class {\tt ABA\_BRANCHRULE}. 
+The default branching strategy can be replaced by the redefinition
+of the virtual function {\tt generateBranch\-Rules()} in a class
+derived from the class {\tt ABA\_SUB}.
+
+\subsubsection{Branching on a Variable}
+\index{branching!on a variable}
+
+The default branching strategy of \ABACUS\ is branching on a variable.
+Different branching variable selection
+strategies can be chosen in the parameter
+file (see Section~\ref{section:parameters}). If a problem specific
+branching variable selections strategy should be implemented it is
+not required to redefine the function {\tt ABA\_SUB::generateBranchRule()},
+but a redefinition of the function 
+\index{ABA\_SUB@{\tt ABA\_SUB}!selectBranchingVariable@{\tt selectBranchingVariable}}
+\begin{verbatim}
+  int ABA_SUB::selectBranchingVariable(int &variable)
+\end{verbatim}
+is sufficient. If a branching variable is found it should be stored
+in the function argument {\tt variable} and 
+{\tt selectBranchingVariable()} should return 0, otherwise it should
+return 1. 
+
+If no branching variable is found, the subproblem is fathomed.
+
+\subsubsection{Branching on a Constraint}
+\index{branching!on a constraint}
+
+As all constraints used in \ABACUS, also branching constraints have
+to be inserted in a pool. The function {\tt ABA\_POOL::insert()} returns
+a pointer to the pool slot the constraint is stored in that is
+required in the constructor of 
+{\tt ABA\_CONBRANCHRULE}\index{ABA\_CONBRANCHRULE@{\tt ABA\_CONBRANCHRULE}}. Although the
+default cut pool can be used for the branching constraints, an extra
+pool for branching constraints is recommended, because first no
+redundant work in the pool separation is performed, and second
+the branching constraint pool should be dynamic such that all 
+branching constraints can be inserted. This pool for the branching
+constraints should be added to your derived master class.
+It is sufficient that the {\tt size} of the branching pool is only a
+rough estimation. If the branching pool is dynamic, it will increase
+automatically if required.
+\begin{verbatim}
+  class MYMASTER : ABA_MASTER {
+   ABA_STANDARDPOOL<ABA_CONSTRAINT, ABA_VARIABLE> *branchingPool_;
+  }
+
+  MYMASTER::MYMASTER(const char *problemName) :
+    ABA_MASTER(problemName, true, false)
+  {
+    branchingPool_ = new ABA_STANDARDPOOL<ABA_CONSTRAINT, ABA_VARIABLE>(this, 
+                                                                        size, 
+                                                                        true);
+  }
+
+  MYMASTER::~MYMASTER()
+  {
+    delete branchingPool_;
+  }
+\end{verbatim}
+The constraint branching rules have to be generated in the function
+{\tt MYSUB::generateBranchRules()}. It might be necessary to introduce
+a new class derived from the class {\tt ABA\_CONSTRAINT} for the
+representation of your branching constraint. For simplification we
+assume here that your branching constraint is also of type {\tt
+  MYCONSTRAINT}. Each constraint is added to the branching pool.
+
+If the generation of branching
+constraints failed, you might try to resort to the standard branching on
+variables.
+\begin{verbatim}
+  int MYSUB::generateBranchRules(ABA_BUFFER<ABA_BRANCHRULE*> &rules)
+  {
+    if (/* branching constraints can be found */) {
+      ABA_POOLSLOT<ABA_CONSTRAINT, ABA_VARIABLE> *poolSlot;
+
+      /* generate the branching rule for the first new subproblem */
+
+      MYCONSTRAINT *constraint1 = new MYCONSTRAINT(...);
+      poolSlot = ((MYMASTER *) master_)->branchingPool_->insert(constraint1);
+      rules.push(new ABA_CONBRANCHRULE(master_, poolSlot);
+
+      /* generate the branching rule for the second new subproblem */
+      MYCONSTRAINT *constraint2 = new MYCONSTRAINT(...);
+      poolSlot = ((MYMASTER *) master_)->branchingPool_->insert(constraint2);
+      rules.push(new ABA_CONBRANCHRULE(master_, poolSlot);
+
+      return 0;
+    }
+    else
+      return ABA_SUB::generateBranchRules(rules);  // resort to standard branching
+  }
+\end{verbatim}
+Moreover, a branching constraint should be locally valid and not
+dynamic. This has to be specified when calling the constructor
+of the base class {\tt ABA\_CONSTRAINT}. Of course, the subproblem defined by
+the branching constraint is not available at the time when
+the branching constraint is generated. However, any locally valid
+constraint requires an associated subproblem in the constructor.
+Therefore, the (incorrect) subproblem in which the branching
+constraint is generated should be used. \ABACUS\ will modify the
+associated subproblem later in the constructor of the subproblem
+generated with the constraint branching rule.
+
+When the subproblem generated by the branching constraint is
+activated at the beginning of its optimization the branching
+constraint is not immediately added to the linear program and the
+active constraints, but it is inserted into the buffer for added 
+constraints similarly as cutting planes are added
+(see Section~\ref{section:addConVar}).
+
+\subsubsection{Problem Specific Branching Rules}
+\label{section:problemSpecificBranchingRules}
+\index{branching!problem specific rules}
+\index{ABA\_BRANCHRULE@{\tt ABA\_BRANCHRULE}}
+
+A problem specific branching rule is introduced by the derivation of
+a new class {\tt MYBRANCHRULE} from the base class {\tt ABA\_BRANCHRULE}.
+As example we show how a branching rule for setting a variable to its
+lower or upper bound is implemented. This example has some small
+differences to the \ABACUS\ class {\tt ABA\_SETBRANCHRULE}.
+\begin{verbatim}
+  class MYBRANCHRULE : public ABA_BRANCHRULE {
+    public:
+      MYBRANCHRULE(ABA_MASTER *master, int variable, ABA_FSVARSTAT::STATUS status);
+      virtual ~MYBRANCHRULE();
+      virtual int extract(ABA_SUB *sub);
+
+    private:
+      int               variable_;  // the branching variable
+      ABA_FSVARSTAT::STATUS status_;    // the status of the branching variable
+  };
+\end{verbatim}
+The constructor initializes the branching variable and its status
+({\tt ABA\_FSVARSTAT::SetToLowerBound} or {\tt ABA\_FSVARSTAT::SetToUpperBound}).
+\begin{verbatim}
+  MYBRANCHRULE::MYBRANCHRULE(ABA_MASTER *master, 
+                             int variable, 
+                             ABA_FSVARSTAT::STATUS status) : 
+    ABA_BRANCHRULE(master),
+    variable_(variable),
+    status_(status)
+  { }
+
+  MYBRANCHRULE::~MYBRANCHRULE()
+  { }
+\end{verbatim}
+The pure virtual function {\tt extract()} of the base class {\tt
+  ABA\_BRANCHRULE} has to be defined in every new branching rule. This
+  function is called when the subproblem is activated at the beginning
+  of its optimization. During the activation of the subproblem a copy
+  of the final constraint and variable system of the father subproblem
+  is made. The function {\tt extract()} should modify this system
+  according to the branching rule. 
+
+In our example we first check if setting the branching variable causes
+a contradiction. In this case we return {\tt 1} in order to indicate
+that the subproblem can be fathomed immediately. Otherwise we set the
+branching variable and return {\tt 0}.
+\begin{verbatim}
+  int MYBRANCHRULE::extract(ABA_SUB *sub)
+  {
+    if (sub->fsVarStat(variable_)->contradiction(status_))
+      return 1;
+    
+    sub->fsVarStat(variable_)->status(status_);
+    return 0;
+  }
+\end{verbatim}
+As a second example for the design of a branching rule we show how the
+constraint branching rule of \ABACUS\ is implemented. After inserted
+the branching constraint in a pool slot the constraint branching rule 
+can be constructed with this pool slot.
+\begin{verbatim}
+  class ABA_CONBRANCHRULE : public ABA_BRANCHRULE {
+    public:
+      ABA_CONBRANCHRULE(ABA_MASTER *master,
+                        ABA_POOLSLOT<ABA_CONSTRAINT, 
+                        ABA_VARIABLE> *poolSlot);
+      virtual ~ABA_CONBRANCHRULE();
+      virtual int extract(ABA_SUB *sub);
+
+    private:
+      ABA_POOLSLOTREF<ABA_CONSTRAINT, ABA_VARIABLE> poolSlotRef_;
+  };
+
+
+  ABA_CONBRANCHRULE::ABA_CONBRANCHRULE(ABA_MASTER *master,
+                             ABA_POOLSLOT<ABA_CONSTRAINT, ABA_VARIABLE> *poolSlot) :
+    ABA_BRANCHRULE(master),
+    poolSlotRef_(poolSlot)
+  { }
+
+  ABA_CONBRANCHRULE::~ABA_CONBRANCHRULE()
+  { }
+\end{verbatim}
+In the function {\tt extract()} the branching constraint is added to
+the subproblem. This should always be done with the function
+{\tt ABA\_SUB::addBranchingConstraint()}. Since adding a branching
+constraint cannot cause a contradiction, we always return 0.
+\begin{verbatim}
+  int ABA_CONBRANCHRULE::extract(ABA_SUB *sub)
+  {
+    if (sub->addBranchingConstraint(poolSlotRef_.slot())) {
+      master_->err() << "ABA_CONBRANCHRULE::extract(): addition of branching  ";
+      master_->err() << "constraint to subproblem failed." << endl;
+      exit(Fatal);
+    }
+
+    return 0;
+  }
+\end{verbatim}
+
+\subsection{Strong Branching}
+\label{section:StrongBranching}
+\index{strong branching}
+
+In order to reduce the size of the enumeration tree, it is important
+to select ``good'' branching rules. We present a framework for
+measuring the quality of the branching rules. First, we describe the
+basic idea and explain the details later.
+
+A branching step is performed by generating a set of branching rules,
+each one defines a son of the current subproblem. We call such a set of
+branching rules a {\it sample\/}\index{branching
+  rules!sample}. For instance, if we branch on a single binary variable, the
+corresponding sample consists of two branching rules, one defining the
+subproblem in which the branching variable is set to the upper bound,
+the other one the subproblem in which the branching variable is set to
+the lower bound. Instead of generating a single branching sample, it
+is now possible to generate a set of branching samples and selecting
+from this set the ``best'' sample for generating the sons of the
+subproblem. In this evaluation process for each branching rule of
+each branching sample a rank is computed. In the default
+implementation this rank is given by performing a limited number of
+iterations of the dual simplex method for the first linear program
+of the subproblem defined by the branching rule. For maximization
+problems we select that sample for which the maximal rank of
+its rules is minimal. For minimization problems we select that sample
+for which the minimal rank of its rules is maximal.
+
+Both the computation of the ranks and the comparison of the rules can
+be adapted to problem specific criteria.
+
+\subsubsection{Default Strong Branching}
+\index{strong branching!default}
+
+Strong branching can be turned on for the built-in branching
+strategies that are controlled by the parameter 
+{\tt BranchingStrategy}\index{BranchingStrategy@{\tt BranchingStrategy}} of the
+configuration file. With the parameter 
+{\tt NBranchingVariableCandidates}\index{NBranchingVariableCandidates@{\tt NBranchingVariableCandidates}} 
+the number of tested branching variables can be indicated 
+(see also Section~\ref{section:parameters}).
+
+\subsubsection{Strong Branching with Special Branching Variable Selection}
+\index{strong branching!variable selection}
+
+In order to use strong branching in combination with a problem specific
+branching variable selection strategy, it is only necessary to
+redefine the virtual function
+\begin{verbatim}
+  int ABA_SUB::selectBranchingVariableCandidates(ABA_BUFFER<int> &candidates)
+\end{verbatim}
+\index{ABA\_SUB@{\tt ABA\_SUB}!selectBranchingVariableCandidates@{\tt selectBranchingVariableCandidates}}
+in the problem specific subproblem class. In the buffer {\tt
+  candidates} the indices of the variables that should be tested as
+branching variables are collected. If at least one candidate is found,
+the function should return {\tt 1}, otherwise {\tt 0}.
+
+\ABACUS\ tests all candidates by solving (partially) the first
+linear program of all potential sons and selects the branching
+variable as previously explained.
+
+\subsubsection{Ranking Branching Rules}
+\index{strong branching!ranking branching rules}
+
+In the default version the rank of a branching rule is computed by the
+function {\tt lpRankBranchingRule()}. The rank can be determined
+differently by redefining the virtual function
+\begin{verbatim}
+  double ABA_SUB::rankBranchingRule(ABA_BRANCHRULE *branchRule)
+\end{verbatim}
+\index{ABA\_SUB@{\tt ABA\_SUB}!rankBranchingRule{\tt rankBranchingRule}}
+that returns a floating point number associated with the rank of the
+{\tt branchRule}.
+
+\subsubsection{Comparing Branching Samples}
+\index{strong branching!comparing branching samples}
+
+After a rank to each rule of each branching sample has been assigned
+by the function {\tt rankBranching\-Rule()} all branching samples
+are compared and the best one is selected. This comparison is
+performed by the virtual function
+\begin{verbatim}
+  int ABA_SUB::compareBranchingSampleRanks(ABA_ARRAY<double> &rank1,
+                                           ABA_ARRAY<double> &rank2)
+\end{verbatim}
+\index{ABA\_SUB@{\tt ABA\_SUB}!compareBranchingSampleRanks@{\tt compareBranchingSampleRanks}}
+that compares the ranks {\tt rank1} of all rules of one branching
+sample with the ranks {\tt rank2} of the rules of another branching
+sample. It returns {\tt 1} if the ranks stored in {\tt rank1} are
+better, {\tt 0} if both ranks are equal, and {\tt -1} if the ranks
+stored in {\tt rank2} are better.
+
+For maximization problems
+in the default version of {\tt compareBranchingSampleRanks()} the array
+{\tt rank1} is better if its maximal entry is less than the maximal
+entry of {\tt rank2} (min-max criteria). For minimization problems {\tt
+  rank1} is better if its minimal entry is greater than the minimal
+entry of {\tt rank2} (max-min criteria).
+
+Problem specific orders of the ranks of branching samples can be
+implemented by redefining the virtual function
+{\tt compareBranchingSampleRanks()}.
+
+\subsubsection{Selecting Branching Samples}
+\index{strong branching!selecting branching samples}
+
+If the redefinition of the function {\tt compareBranchingSample()} is
+not adequate for a problem specific selection of the branching sample,
+then the virtual function
+\begin{verbatim}
+  int ABA_SUB::selectBestBranchingSample(int nSamples,
+                                         ABA_BUFFER<ABA_BRANCHRULE*> **samples)
+\end{verbatim}
+\index{ABA\_SUB@{\tt ABA\_SUB}!selectBestBranchingSample@{\tt selectBestBranchingSample}}
+can be redefined. The number of branching samples is given by the
+integer number {\tt
+  nSamples}, the array {\tt samples} stores pointers to buffers storing
+the branching rules of the samples. The function should return the
+number of the best branching sample.
+
+\subsubsection{Strong Branching with other Branching Rules}
+\index{strong branching!other branching rules}
+
+As explained in Section~\ref{section:otherBranching} other branching
+strategies than branching on variables can be chosen by redefining the
+virtual function 
+\index{ABA\_SUB@{\tt ABA\_SUB}!generateBranchRules@{\tt generateBranchRules}}
+\begin{verbatim}
+  int ABA_SUB::generateBranchRules(ABA_BUFFER<ABA_BRANCHRULE*> &rules);
+\end{verbatim}
+in the problem specific subproblem class.
+Instead of generating immediately a single branching sample and
+storing it in the buffer {\tt rules} it is possible to generate first
+a set of samples and selecting the best one by calling the function
+\begin{verbatim}
+  int ABA_SUB::selectBestBranchingSample(int nSamples,
+                                         ABA_BUFFER<ABA_BRANCHRULE*> **samples).
+\end{verbatim}
+\index{ABA\_SUB@{\tt ABA\_SUB}!selectBestBranchingSample@{\tt selectBestBranchingSample}}
+For problem specific branching rules that are not already provided by
+\ABACUS, but derived from the base class {\tt ABA\_BRANCHRULE}, it is
+necessary to redefine the virtual function
+\begin{verbatim}
+  void ABA_BRANCHRULE::extract(ABA_LPSUB *lp)
+\end{verbatim}
+\index{ABA\_BRANCHRULE@{\tt ABA\_BRANCHRULE}!extract@{\tt extract}}
+if the ranks of the branching rules are computed by solving the first
+linear program of the potential sons as \ABACUS\ does in its default
+version. Similar as the function 
+\begin{verbatim}
+  int ABA_BRANCHRULE::extract(SUB *sub)
+\end{verbatim}
+(see Section~\ref{section:problemSpecificBranchingRules}) modifies
+the subproblem according to the branching rule, the virtual function
+\begin{verbatim}
+  void extract(ABA_LPSUB *lp) 
+\end{verbatim}
+should modify the linear programming
+relaxation in order to evaluate the branching rule.
+
+In addition the virtual function
+\begin{verbatim}
+  void ABA_BRANCHRULE::unextract(ABA_LPSUB *lp)
+\end{verbatim}
+\index{ABA\_BRANCHRULE@{\tt ABA\_BRANCHRULE}!extract@{\tt extract}}
+must also be redefined. It should undo the modifications of the
+linear programming relaxation performed by {\tt extract(ABA\_LPSUB *lp)}.
+
+\subsection{Activating and Deactivating a Subproblem}
+\noindent
+Entry points at the beginning and at the end of the subproblem optimization
+are provided by the functions 
+{\tt activate()}\index{ABA\_SUB@{\tt ABA\_SUB}!activate@{\tt activate}} and 
+{\tt deactivate()}\index{ABA\_SUB@{\tt ABA\_SUB}!deactivate@{\tt deactivate}}.
+
+\subsection{Calling ABACUS Recursively}
+\index{recursive calls of \ABACUS}
+\noindent
+The separation or pricing problem in a \bab\ algorithm can again be
+a \mip. In this case, it might be appropriate to solve this problem
+again with an application of \ABACUS. The pricing problem of a
+solver for \bcsp s, e.g., is under certain conditions a general \mip\
+\cite{VBJN94}. The
+following example shows how this part of the function {\tt pricing()}
+could look like for the \bcsp.
+First, we construct an object of the
+class {\tt LPFORMAT}, storing the pricing problem formulated as a
+\mip, then we initialize the solver of the pricing problem.
+The class {\tt MIP} is derived from the class {\tt ABA\_MASTER} for the solution
+of general \mip s (the classes {\tt LPFORMAT} and {\tt MIP} are not
+part of the \ABACUS\ kernel but belong to
+a not publicly available \ABACUS\ application). 
+After the optimization we retrieve the value of the optimal
+solution.
+\begin{verbatim}
+  LPFORMAT knapsackProblem(master_, nOrigVar_, 1 + nSosCons_, &optSense,
+                           origObj_, lBound, uBound, varType, constraints);
+
+  MIP *knapsackSolver = new MIP(&knapsackProblem, "CSP-Pricer");
+
+  knapsackSolver->optimize();
+
+  optKnapsackValue = knapsackSolver->primalBound();
+\end{verbatim}
+
+\subsection{Selecting the LP-Method}
+\label{section:selectingLpMethod}
+\index{linear program!method}
+
+Before the linear programming relaxation is solved, the virtual
+function 
+\index{ABA\_SUB@{\tt ABA\_SUB}!chooseLpMethod@{\tt chooseLpMethod}}
+\begin{verbatim}
+  ABA_LP::METHOD ABA_SUB::chooseLpMethod(int nVarRemoved, int nConRemoved,
+                                         int nVarAdded, int nConAdded)
+\end{verbatim}
+is called in each iteration of the cutting plane algorithm, if approximate
+solving is disabled (the default).
+\index{approximate solver}
+If the usage of the approximate solver is enabled (by setting the parameter 
+SolveApprox to true in the configuration file {\tt .abacus}), the virtual
+function {\tt ABA\_SUB::solveApproxNow()} is called first. If this function 
+returns true the LP method is set to {\tt ABA\_LP::Approximate} (if the 
+current situation in the cutting plane algorithm does not require an exact
+solution, e.g. to prepare branching).
+
+The parameters of the function {\tt ABA\_SUB::chooseLpMethod} refer to the
+number of removed and added variables and constraints.
+If a linear programming relaxation should be solved with a strategy different
+from the default strategy, then this virtual function must be
+redefined in the class {\tt MYSUB}. According to the criteria of our new
+application the function {\tt chooseLpMethod()} must return
+{\tt ABA\_LP::BarrierAndCrossover}, {\tt ABA\_LP::BarrierNoCrossover}, 
+{\tt ABA\_LP::Primal},
+or~{\tt ABA\_LP::Dual}.
+The LP methods {\tt ABA\_LP::BarrierAndCrossover} and
+{\tt ABA\_LP::BarrierNoCrossover} are provided only for compatibility with
+older versions of \ABACUS\ and custom solver interfaces as the current interface
+only supports the methods {\tt ABA\_LP::Primal} and {\tt ABA\_LP::Dual} (and
+{\tt ABA\_LP::Approximate}, see above).
+
+\subsection{Generating Output}
+\index{output}
+\noindent
+We recommend to use also for problem specific output the built-in output
+and error streams via the member functions 
+{\tt out()}\index{ABA\_GLOBAL@{\tt ABA\_GLOBAL}!out@{\tt out}} 
+and {\tt err()}\index{ABA\_GLOBAL@{\tt ABA\_GLOBAL}!err@{\tt err}}
+of the class {\tt ABA\_GLOBAL}:
+\begin{verbatim}
+  master_->out() << "This is a message for the output stream." << endl;
+  master_->err() << "This is a message for the error stream." << endl;
+\end{verbatim}
+For messages output from members of the class {\tt ABA\_MASTER} and its derived
+classes dereferencing the pointer to the master can be omitted:
+\begin{verbatim}
+  out() << "This is a message for the output stream from a master class." << endl;
+  err() << "This is a message for the error stream from a master class." << endl;
+\end{verbatim}
+The functions {\tt out()} and {\tt err()} can receive optionally an integer
+number as argument giving the amount of indentation. One unit of indentation
+is four blanks.
+
+The amount of output can be controlled by the parameter {\tt OutLevel} in
+the file {\tt .abacus} (see Section~\ref{section:parameters}). 
+If some output should be generated although it is
+turned off for a certain output level at this point of the program, then
+it can be turned temporarily on.
+\begin{verbatim}
+  int MYSUB::myFunction()
+  {
+    if (master_->outLevel() == ABA_MASTER::LinearProgram) master_->out().on();
+    master_->out() << "This output appears only for output level ";
+    master_->out() << "`LinearProgram'." << endl;
+    if (master_->outLevel() == ABA_MASTER::LinearProgram) master_->out().off();
+  }
+\end{verbatim}
+
+\subsection{Memory Management}
+\index{memory management}
+\label{section:memoryManagement}
+
+The complete memory management of data allocated in member functions
+of application specific classes has to be performed by the user, i.e.,
+memory allocated in such a function also has to be deallocated in
+an application specific function. However, there are some exceptions.
+As soon as a constraint or a variable is added to a pool\index{pool}
+its memory management is passed to \ABACUS. This also holds if the
+constraint or variable is added to a pool with the functions 
+{\tt ABA\_SUB::addCons()}\index{ABA\_SUB@{\tt ABA\_SUB}!addCons@{\tt addCons}} or
+{\tt ABA\_SUB::addVars()}\index{ABA\_SUB@{\tt ABA\_SUB}!addVars@{\tt addVars}}.
+Constraints and variables are
+allocated in problem specific functions, but deallocated by the
+framework.
+
+Another exception are branching rules added to a 
+subproblem. But this is only relevant for applications that
+add a problem specific branching rule. If variables are fixed or
+set by logical implications, then objects of the 
+class~{\tt ABA\_FSVARSTAT}\index{ABA\_FSVARSTAT@{\tt ABA\_FSVARSTAT}}
+are allocated. Also for these objects the further memory management
+is performed by the framework.
+
+In order to save memory a part of the data members of a subproblem
+can be accessed only when the subproblem is currently being optimized.
+These data members are listed in Table~\ref{table:activatedDataOfSub}.
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{|l|l|}
+   \hline
+   Member & Description \\
+   \hline
+   {\tt tailOff\_} &  tailing off manager \\
+   {\tt lp\_}      &  linear programming relaxation \\
+   {\tt addVarBuffer\_} &  buffer for adding variables \\
+   {\tt addConBuffer\_} &  buffer for adding constraints \\
+   {\tt removeVarBuffer\_} &  buffer for removing variables \\
+   {\tt removeConBuffer\_} &  buffer for removing constraints \\
+   {\tt xVal\_} &  values of the variables in the last solved ABA\_LP \\
+   {\tt yVal\_} &  values of the dual variables in the last solved ABA\_LP \\
+   \hline
+\end{tabular}
+\caption{Activated members of {\tt ABA\_SUB}.}
+\label{table:activatedDataOfSub}
+\end{center}
+\end{table}
+
+\subsection{Eliminating Constraints}
+\index{constraint!eliminating}
+\noindent
+In order to keep the number of active constraints within a moderate size
+active constraints can be eliminated by setting the built-in
+parameter 
+{\tt ConstraintEliminationMode}\index{ConstraintEliminationMode@{\tt ConstraintEliminationMode}} 
+to {\tt Basic} or 
+{\tt NonBinding} (see Section~\ref{section:parameters}). 
+Other problem specific strategies can be implemented by
+redefining the virtual function 
+\index{ABA\_SUB@{\tt ABA\_SUB}!conEliminate@{\tt conEliminate}}
+\begin{verbatim}
+  void MYSUB::conEliminate(ABA_BUFFER<int> &remove)
+  {
+    for (int i = 0; i < nCon(); i++)
+      if (/* constraint i should be eliminated */)
+        remove.push(i);
+  }
+\end{verbatim}
+within the subproblem of the new application.
+
+The function {\tt conEliminate()} is called within the cutting plane algorithm.
+Moreover, we provide an even more flexible method for the elimination
+of constraints by the functions {\tt removeCon()} and {\tt removeCons()},
+which can be called from any function within the cutting plane method.
+The functions
+\index{ABA\_SUB@{\tt ABA\_SUB}!removeCon@{\tt removeCon}}
+\index{ABA\_SUB@{\tt ABA\_SUB}!removeCons@{\tt removeCons}}
+\begin{verbatim}
+  void ABA_SUB::removeCon(int i);
+  void ABA_SUB::removeCons(ABA_BUFFER<int> &remove);
+\end{verbatim}
+
+\noindent
+which remove the constraint {\tt i} or the constraints stored in the buffer
+{\tt remove}, respectively.
+
+Both constraints removed by the function {\tt conEliminate()} and by
+explicitly calling the function {\tt remove()} are not removed immediately from the
+active constraints and the linear program, but buffered, and the updates
+are performed at the beginning of the next iteration of the cutting plane
+method.
+
+\subsection{Eliminating Variables}
+\index{variable!eliminating}
+
+Similarly to the constraint elimination, variables can be eliminated
+either by setting the parameter {\tt VariableEliminationMode}
+to {\tt ReducedCost} or by redefining the virtual function {\tt varEliminate()}
+according to the needs of our application.
+\index{ABA\_SUB@{\tt ABA\_SUB}!varEliminate@{\tt varEliminate}}
+\begin{verbatim}
+  void  ABA_SUB::varEliminate(ABA_BUFFER<int> &remove)
+  {
+    for (int i = 0; i < nVar(); i++)
+      if (/* variable i should be eliminated)
+        remove.push(i);
+  }
+\end{verbatim}
+By analogy to the removal of constraints we provide functions to
+remove variables within any function of the cutting plane algorithm.
+The functions
+\index{ABA\_SUB@{\tt ABA\_SUB}!removeVar@{\tt removeVar}}
+\index{ABA\_SUB@{\tt ABA\_SUB}!removeVars@{\tt removeVars}}
+\begin{verbatim}
+  void ABA_SUB::removeVar(int i);
+  void ABA_SUB::removeVars(ABA_BUFFER<int> &remove);
+\end{verbatim}
+which remove the variable {\tt i} or the variables stored in the buffer
+{\tt remove}, respectively.
+
+Like eliminated constraints eliminated variables are buffered and the
+update is performed at the beginning of the next iteration of the cutting
+plane algorithm.
+
+\subsection{Adding Constraints/Variables in General}
+\label{section:addConVar}
+\index{constraint!adding}
+\index{variable!adding}
+
+The functions {\tt separate()} and {\tt pricing()}
+provide interfaces where constraints/variables
+are usually generated in the cutting plane or column generation
+algorithm. Moreover, to provide a high flexibility we allow the addition
+and removal of constraints and variables within any subroutine of the
+cutting plane or column generation algorithm as we have already pointed
+out.
+
+{\bf Note}, while constraints or variables
+added with the function {\tt addCons()} or {\tt addVars()} are usually
+allocated by the user, they are deleted by \ABACUS. They must {\bf
+  not} be deleted by the user (see Section~\ref{section:memoryManagement}).
+
+The sizes of the buffers that store the constraints/variables
+being added can be controlled by the parameters
+{\tt MaxConBuffered}\index{MaxConBuffered@{\tt MaxConBuffered}}
+and {\tt MaxVarBuffered}\index{MaxVarBuffered@{\tt MaxVarBuffered}} in the parameter
+file~{\tt .abacus}. At the start of the next iteration the
+best {\tt MaxConAdd}\index{MaxConAdd@{\tt MaxConAdd}} constraints and the 
+best {\tt MaxVarAdd}\index{MaxVarAdd@{\tt MaxVarAdd}} variables
+are added to the subproblem. This evaluation of the buffered items is
+only possible if a rank has been specified for each item in the 
+functions {\tt addCons()} and {\tt addVars()}, respectively.
+
+Moreover, we provide further features for the addition of cutting planes
+with the function~{\tt addCons()}:
+\index{ABA\_SUB@{\tt ABA\_SUB}!addCons@{\tt addCons}}
+\begin{verbatim}
+   virtual int addCons(ABA_BUFFER<ABA_CONSTRAINT*>            &constraints,
+                       ABA_POOL<ABA_CONSTRAINT, ABA_VARIABLE> *pool = 0,
+                       ABA_BUFFER<bool>                       *keepInPool = 0,
+                       ABA_BUFFER<double>                     *rank = 0);
+\end{verbatim}
+The buffer {\tt constraints} holds the constraints being added. All
+other arguments are optional or ignored if they are 0. If the argument
+{\tt pool} is not 0, then the constraints are added to this pool instead
+of the default pool. If the flag {\tt (*keepInPool)[i]}
+is {\tt true} for the {\tt i}-th added constraint, then this constraint
+will even be stored in the pool if it is not added to the active constraints.
+In order to define
+an order of the buffered constraints a {\tt rank} has to be specified
+for each constraint in the function {\tt addCons()}.
+
+As constraints can be added with the function {\tt addCons()},
+the function 
+\index{ABA\_SUB@{\tt ABA\_SUB}!addVars@{\tt addVars}}
+\begin{verbatim}
+  virtual int addVars(ABA_BUFFER<ABA_VARIABLE*>              &variables,
+                      ABA_POOL<ABA_VARIABLE, ABA_CONSTRAINT> *pool = 0,
+                      ABA_BUFFER<bool>                       *keepInPool = 0,
+                      ABA_BUFFER<double>                     *rank = 0);
+\end{verbatim}
+can be used for a flexible addition of variables to the buffer in a 
+straightforward way.
+
+The function {\tt pricing()} handles non-liftable constraints correctly
+(see Section~\ref{section:DesignNonLiftable}). 
+However, if variables are generated within another
+part of the cutting plane algorithm and non-liftable constraints are
+present, then run-time errors or wrong results can be produced. 
+If \ABACUS\ is compiled in the safe mode ({\tt -DABACUSSAFE}) this
+situation is recognized and the program stops with an error message.
+If in an application both non-liftable constraints are generated
+and variables are added outside the function {\tt pricing()}, then
+the user has to remove non-liftable constraints explicitly to avoid
+errors.
+
+\subsubsection{Activation of a Subproblem}
+\index{subproblem!activating}
+\noindent
+After a subproblem becomes active the virtual function {\tt activate()} is
+called. Its default implementation in the class {\tt ABA\_SUB} does nothing
+but it can be redefined in the derived class~{\tt MYSUB}. In this
+function application specific data structures that are only required
+for an active subproblem can be set up, e.g., a graph associated with the
+subproblem:
+\index{ABA\_SUB@{\tt ABA\_SUB}!activate@{\tt activate}}
+\begin{verbatim}
+  void MYSUB::activate()
+  { }
+\end{verbatim}
+
+
+\subsubsection{Deactivation of a Subproblem}
+\index{subproblem!deactivate}
+\noindent
+The virtual function {\tt deactivate()} is the counterpart of the function
+{\tt activate()}. It is called at the end of the optimization of a subproblem
+and again its default implementation does nothing. In this function, e.g.,
+memory allocations performed in the function {\tt activate()} can be undone:
+\index{ABA\_SUB@{\tt ABA\_SUB}!deactivate@{\tt deactive}}
+\begin{verbatim}
+  void MYSUB::deactivate()
+  { }
+\end{verbatim}
+
+
+\subsection{Fixing and Setting Variables by Logical Implications}
+\index{fixing variables!by logical implications}
+\index{setting variables!by logical implications}
+\noindent
+Variables can by fixed and set by logical implications by redefining the virtual 
+functions
+\index{ABA\_SUB@{\tt ABA\_SUB}!fixByLogImp@{\tt fixByLogImp}}
+\begin{verbatim}
+  void MYSUB::fixByLogImp(ABA_BUFFER<int> &variables, 
+                          ABA_BUFFER<ABA_FSVARSTAT*> &status) 
+  {}
+\end{verbatim}
+\noindent
+and\index{ABA\_SUB@{\tt ABA\_SUB}!setByLogImp@{\tt setByLogImp}}
+\begin{verbatim}
+  void MYSUB::setByLogImp(ABA_BUFFER<int> &variables, 
+                          ABA_BUFFER<ABA_FSVARSTAT*> &status) 
+  {}
+\end{verbatim}
+The buffers {\tt variables} hold the variables being fixed or set, 
+respectively, and the buffers
+{\tt status} the statuses they are fixed or set to, respectively.
+The following piece of code gives a fragment of an implementation of
+the function {\tt fixByLogImp()}.
+\begin{verbatim}
+  void MYSUB::fixByLogImp(ABA_BUFFER<int> &variables, 
+                          ABA_BUFFER<ABA_FSVARSTAT*> &status)
+  {
+    for (int i = 0; i < nVar(); i++)
+      if (/* condition for fixing i to lower bound holds */) {
+        variables.push(i);
+        status.push(new ABA_FSVARSTAT(master_, ABA_FSVARSTAT::FixedToLowerBound));
+      }
+      else if (/* condition for fixing i to upper bound holds */) {
+        variables.push(i);
+        status.push(new ABA_FSVARSTAT(master_, ABA_FSVARSTAT::FixedToUpperBound));
+      }
+  }
+\end{verbatim}
+Setting variables by logical implications can be implemented analogously
+by replacing ``{\tt FixedTo}'' with ``{\tt SetTo}''.
+
+
+\subsection{Loading an Initial Basis}
+\index{basis!loading initial}
+\noindent
+By default, the barrier method is used for the solution of the first
+linear program of the subproblem. However, a basis can be also loaded,
+and then, the LP-method can be accordingly selected with the
+function {\tt chooseLpMethod()} (see Section~\ref{section:selectingLpMethod}).
+The variable and slack variable statuses can be initialized
+in the constructor of the root node like in the following example.
+\begin{verbatim}
+  MYSUB::MYSUB(ABA_MASTER *master) : 
+  ABA_SUB(master, 50.0, 0.0, 100.0)
+  { 
+    ABA_LPVARSTAT::STATUS  lStat;
+    for (int i = 0; i < nVar(); i++) {
+      lStat = /* one of ABA_LPVARSTAT::AtLowerBound, ABA_LPVARSTAT::Basic, 
+                 or ABA_LPVARSTAT::AtUpperBound */; 
+      lpVarStat(i)->status(lStat);
+    }
+    ABA_SLACKSTAT::STATUS sStat;
+    for (int i = 0; i < nCon(); i++) {
+      sStat = /* one of  ABA_SLACKSTAT::Basic or ABA_SLACKSTAT::NonBasicZero */;
+      slackStat(i)->status(sStat)
+    }
+  }
+\end{verbatim}
+
+
+\subsection{Integer Objective Functions}
+\index{integer objective function}
+\noindent
+If all objective function values of feasible solutions have
+integer values, then a subproblem can be fathomed earlier because
+its dual bound can be rounded up for a minimization problem, or down
+for a maximization problem, respectively. This feature
+can be controlled by the parameter 
+{\tt ObjInteger}\index{ObjInteger@{\tt ObjInteger}} of the parameter
+file (see Section~\ref{section:parameters}). 
+
+This feature can depend on the specific problem instance. Moreover,
+if variables are generated dynamically, it is even possible that
+this attribute depends on the currently active variable set.
+Therefore, we provide the function
+\index{ABA\_MASTER@{\tt ABA\_MASTER}!objInteger@{\tt objInteger}}
+\begin{verbatim}
+  void ABA_MASTER::objInteger(bool switchedOn);
+\end{verbatim}
+\noindent
+with which the automatic rounding of the dual bound can be turned on
+(if {\tt switchedOn} is {\tt true}) or off (if {\tt switchedOn} is {\tt false}).
+
+Helpful for the analysis if all objective function values of all feasible
+solutions are integer with respect to the currently active variable
+set of the subproblem might be the function
+\index{ABA\_SUB@{\tt ABA\_SUB}!objAllInteger@{\tt objAllInteger}}
+\begin{verbatim}
+  bool ABA_SUB::objAllInteger();
+\end{verbatim}
+\noindent
+that returns {\tt true} if all active variables of the subproblem are discrete
+and their objective function coefficients
+are integer, and returns
+{\tt false} otherwise.
+
+If the set of active variables is static, i.e.,
+no variables are generated dynamically,
+then the function {\tt objAllInteger()} could be called in the constructor
+of the root node of the enumeration tree and according to the result
+the flag of the master can be set:
+\begin{verbatim}
+  MYSUB::MYSUB(ABA_MASTER *master) :
+    ABA_SUB(master, 50.0, 0.0, 100.0)
+  {
+    master_->objInteger(objAllInteger());
+  }
+\end{verbatim}
+By default, we assume that the objective function values of feasible
+solutions can also have noninteger values.
+
+\subsection{An Entry Point at the End of the Optimization}
+
+While the virtual function 
+{\tt initializeOptimization()}\index{ABA\_MASTER@{\tt ABA\_MASTER}!initializeOptimization@{\tt initializeOptimization}} is called at
+the beginning of the optimization and can be redefined for the
+initialization of application specific data (e.g., the variables 
+and constraints), the virtual function 
+{\tt terminateOptimization()}\index{ABA\_MASTER@{\tt ABA\_MASTER}!terminateOptimization@{\tt terminateOptimization}}
+is called at the end of the optimization. Again, the default implementation
+does nothing and a redefined version can be used, e.g., for visualizing
+the best feasible solution on the screen.
+
+\subsection{Output of Statistics}
+
+At the end of the optimization a solution history and some general
+statistics about the optimization are output. Problem specific 
+statistics can be output by redefining the virtual function
+{\tt output()} of the class {\tt ABA\_MASTER} in the class 
+{\tt MYMASTER}. The default implementation of the 
+function {\tt output()}\index{ABA\_MASTER@{\tt ABA\_MASTER}!output@{\tt output}}
+does nothing. Of course, application specific output can be also
+generated in the function {\tt terminateOptimization()}, but then
+this output appears before the solution history and some other
+statistics. If the function {\tt output()} is used, problem specific
+statistics are output between the general statistics and the value
+of the optimum solution.
+
+\subsection{Accessing Internal Data of the LP-Solver}
+\index{LP-solver!internal data}
+
+The class {\tt ABA\_SUB} has the member function {\tt ABA\_LPSUB *lp()} that
+allows a direct access of the data of the linear program solved within
+the subproblem. If the member functions of the class {\tt ABA\_LPSUB} and
+its base class {\tt ABA\_LP} are not sufficient to retrieve a specific 
+information, a direct access of the data of the LP-Solvers is possible.
+
+The data retrieved from your LP-solver in this direct way
+has to be interpreted very
+carefully. Since variables might be automatically eliminated the
+actual linear program submitted to the LP-solver might differ from the
+linear programming relaxation. Only if LP-data is accessed through the
+member functions of the class  {\tt ABA\_LPSUB} the ``real'' linear
+programming relaxation is obtained.
+
+{\bf Warning:} Do not modify the data of the LP-solver using the
+pointers to the internal data structures and the functions of the
+solver interface. A correct modification of the LP-data is only
+guaranteed by the member functions of the class {\tt ABA\_SUB}.
+
+\subsubsection{Accessing Internal Data of the LP-solver}
+\index{Osi!internal data}
+
+Internal data of the solver is retrieved with the function
+\index{ABA\_OSIIF@{\tt ABA\_OSIIF}!osiLP{\tt osiLP}}
+\begin{verbatim}
+  OsiSolverInterface* ABA_OSIIF::osiLP();
+\end{verbatim}
+that returns a pointer to the OsiSolverInterface object that manages the
+interaction with the LP-solver.
+
+Since the linear programming relaxation of a subproblem is designed
+independently from the LP-solver an explicit cast to the class
+{\tt ABA\_LPSUBOSI} is required:
+\begin{verbatim}
+  OsiSolverInterface* LpInterface = ((ABA_LPSUBOSI*) lp())->osiLP();
+\end{verbatim}
+The class {\tt ABA\_LPSUBOSI} is derived from the classes {\tt ABA\_LPSUB}
+and {\tt ABA\_OSIIF}.
+
+\subsection{Problem Specific Fathoming Criteria}
+\label{section:exceptionFathom}
+\index{fathoming!problem specific}
+\index{ABA\_SUB@{\tt ABA\_SUB}!exceptionFathom@{\tt exceptionFathom}}
+
+Sometimes structural problem specific information can be used for
+fathoming a subproblem. Such criteria can be implemented by redefining
+the virtual function {\tt ABA\_SUB::exceptionFathom()}. This function is
+called before the separation or pricing is performed. If this function
+returns {\tt false} (as the default implementation in the base class
+{\tt ABA\_SUB} does), we continue with separation or pricing. Otherwise, if
+it returns {\tt true}, the subproblem is fathomed.
+
+\subsection{Enforcing a Branching Step}
+\label{section:exceptionBranch}
+\index{branching!enforcing}
+\index{ABA\_SUB@{\tt ABA\_SUB}!exceptionBranch@{\tt exceptionBranch}}
+
+\ABACUS\ enforces a branching step if a tailing off effect is
+observed. Other problem specific criteria for branching instead of
+continuing the cutting plane or column generation algorithm can be
+specified by redefining the function {\tt
+  ABA\_SUB::exceptionBranch()}. This criterion is checked before the
+separation or pricing is performed. If the function returns {\tt
+  true}, a branching step is performed. Otherwise, we continue with
+the separation or pricing. The default implementation of the base
+class {\tt ABA\_SUB} always returns {\tt false}.
+
+\subsection{Advanced Tailing Off Control}
+\label{section:ignoreInTailingOff}
+\index{tailing off!advanced control}
+\index{ABA\_SUB@{\tt ABA\_SUB}!ignoreInTailingOff@{\tt ignoreInTailingOff}}
+
+\ABACUS\ automatically controls the tailing off effect according to the
+parameters {\tt TailOffNLps} and {\tt TailOffPercent} of the
+configuration file {\tt .abacus}. However, sometimes it turns out that
+certain solutions of the LP-relaxations should be ignored in the
+tailing off control. 
+The function {\tt ignoreInTailingOff()} can be used to control better
+the tailing off effect. If this function is called, the next
+LP-solution is ignored in the tailing-off control. Calling 
+{\tt ignoreInTailingOff()} can, e.g., be considered in the following
+situation: If only constraints that are required for the integer
+programming formulation of the optimization problem are added then
+the next LP-value could be ignored in the tailing-off control. Only
+``real'' cutting planes should be considered in the tailing-off
+control (this is only an example strategy that might not be
+practical in many situations, but sometimes turned out to be
+efficient).
+
+
+\subsection{System Parameters}
+\label{section:parameters}
+\index{parameters}
+
+The setting of several parameters heavily 
+influences the running time. Good candidates are the modification
+of the enumeration strategy with the parameter {\tt EnumerationStrategy}, 
+the control of the tailing off effect with the parameters
+{\tt TailOffNLps} and {\tt TailOffPercent}, an adaption of the
+skipping method for the cut generation with the parameters
+{\tt SkipFactor} and {\tt SkipByNode}, and the parameters 
+specific to the used LP-solver.
+
+Here we present a complete list of the parameters that can be modified
+for the fine tuning of the algorithm in the 
+file {\tt .abacus}\index{.abacus@{\tt .abacus}}.
+Almost all parameters can be modified with member functions of the
+class {\tt ABA\_MASTER}. Usually, these member functions have the same name
+as the parameter, but the first letter is a lower case letter.
+The parameters specific to the LP-solver can be set by redefining the 
+virtual function {\tt ABA\_MASTER::setSolverParameters()}, see Section~
+\ref{section:solverparameters} for details.
+
+\smallskip\noindent
+{\bf Warning:} The integer numbers used in the parameter files must
+               not exceed the value of {\tt INT\_MAX} 
+               given in the file {\tt <limits.h>}.
+               The default values are correct for platforms representing
+               the type {\tt int} with 32 bits (usually 2147483647 on
+               machines using the $b$-complement).
+
+\parameter
+{EnumerationStrategy}
+{This parameter controls the enumeration strategy\index{enumeration strategy}
+ in the \bab\ algorithm.}
+{\parametervalue{{\tt BestFirst}}{best-first search}
+ \parametervalue{{\tt BreadthFirst}}{breadth-first search}
+ \parametervalue{{\tt DepthFirst}}{depth-first search}
+ \parametervalue{{\tt DiveAndBest}}{depth-first search until the first feasible
+                       solution is found, then best-first search}
+}
+{{\tt BestFirst}}                  
+
+\parameter
+{Guarantee}
+{The \bab\ algorithm stops as soon as a primal bound and a
+ global dual bound are known such that it can be guaranteed\index{guarantee}
+ that the
+ value of an optimum solution is at most {\tt Guarantee} percent better than
+ the primal bound. 
+ The value 0.0 means determination
+ of an optimum solution. If the program terminates with a guarantee greater
+ than 0, then the status of the master is {\tt ABA\_MASTER::Guarantee} instead of
+ {\tt ABA\_MASTER::Optimal}.
+}
+{A nonnegative floating point number.}
+{{\tt 0.0}}
+
+\parameter
+{MaxLevel}
+{This parameter indicates the maximal level\index{level in enumeration tree}
+ that should be reached in 
+ the enumeration tree. Instead of performing a branching operation
+ any subproblem having level {\tt MaxLevel} is fathomed.
+ If the value of {\tt MaxLevel} is 1, then no branching is done, i.e.,
+ a pure cutting plane algorithm is performed. If the maximal
+ enumeration level is reached, the master of the optimization
+ receives the status {\tt MaxLevel} in order to indicate that the
+ problem does not necessarily terminate with an optimum solution.
+}
+{A positive integer number.}
+{{\tt 999999}}
+
+\parameter
+{MaxCpuTime}
+{This parameter indicates the maximal CPU time\index{cpu time!maximal}
+ that may be used by the 
+ optimization process. If the
+ CPU time exceeds this value, then the master of the optimization
+ receives the status~{\tt MaxCpuTime}  in order to indicate that the
+ problem does not necessarily terminate with an optimum solution. 
+ In this case, the real CPU time
+ can exceed this value since we check the used CPU time only in
+ the main loop of the cutting plane algorithm. Under the operating
+ system UNIX a more exact check can be done with the command~{\tt limit}, 
+ which kills the process if the maximal
+ CPU time is exceeded, whereas our CPU time control ``softly'' terminates
+ the run, i.e., the \bab\ tree is cleaned, all relevant 
+ destructors are called, and the final output is generated.
+}
+{A string in the format {\tt h$\{$h$\}$:mm:ss}, where the first number
+ represents the hours, the second one the minutes, and the third
+ one the seconds.
+ Note, internally this string is converted to seconds. Therefore, its
+ value must be less than {\tt INT\underscore MAX} seconds.
+}
+{{\tt 99999:59:59}}
+
+\parameter
+{MaxCowTime}
+{This parameter indicates the maximal elapsed time\index{elpased time!maximal}
+ (wall clock time) that may be used  by the process. If the
+ elapsed time exceeds this value, then the master of the optimization
+ receives the status {\tt MaxCowTime} in order to indicate that the
+ problem does not necessarily terminate with an optimum solution. 
+ In this case, the real elapsed time
+ can exceed this value since we check the elapsed time only in
+ the main loop of the cutting plane algorithm. 
+}
+{A string in the format {\tt h$\{$h$\}$:mm:ss}, where the first number
+ represents the hours, the second one the minutes, and the third 
+ one the seconds.
+ Note, internally this string is converted to seconds. Therefore, its
+ value must be less than {\tt INT\underscore MAX} seconds.
+}
+{{\tt 99999:59:59}}
+
+\parameter
+{ObjInteger}
+{If this parameter is {\tt true}, then we assume that all feasible
+ solutions have integer objective function\index{integer objective function}
+ values. In this case,
+ we can fathom a subproblem in the \bab\ algorithm already
+ when the gap between the solution of the linear programming
+ relaxation and the primal bound is less than 1.}
+{{\tt false} or {\tt true}}
+{{\tt false}}
+
+\parameter
+{TailOffNLps}
+{This parameter indicates the number of linear programs\index{tailing 
+ off!number of LPs} considered in the 
+ tailing off analysis (see parameter {\tt TailOffPercent}).}
+{An integer number. If this number is nonpositive, then the tailing off
+ control is turned off.}
+{{\tt 0}}
+
+\parameter
+{TailOffPercent}
+{This parameter indicates the minimal change\index{tailing off!minimal
+ change} in percent of the objective 
+ function value between
+ the solution of {\tt TailOffNLps} successive linear programming relaxations
+ in the subproblem optimization which is required such that
+ we do not try to stop the cutting plane algorithm and to enforce a
+ branching step.
+}
+{A nonnegative floating point number.}
+{{\tt 0.0001}}
+
+\parameter
+{DelayedBranchingThreshold}
+{This number\index{delayed branching}
+ indicates how often a subproblem should be put back
+ into the set of open subproblems before a branching step is
+ executed. The value 0 means that we branch immediately at the
+ end of the first optimization, if the subproblem is not fathomed.
+ We try to keep the subproblem {\tt MinDormantRounds} untouched, i.e.,
+ other subproblems are optimized if possible before we turn back to the
+ optimization of this subproblem.
+}
+{A positive integer number.}
+{{\tt 0}}
+
+\parameter
+{MinDormantRounds}
+{The minimal number\index{dormant rounds} 
+ of iterations we try to keep a subproblem
+  dormant if delayed branching is applied.}
+{A positive integer number.}
+{1}
+
+\parameter
+{OutputLevel}
+{We can control the amount of output\index{output level}
+ during the optimization by this
+ parameter.
+
+For the parameter values \texttt{Subproblem} and
+\texttt{LinearProgram} a seven column output is generated with the
+following meaning:
+
+\noindent
+\begin{tabular}{ll}
+{\tt \#sub}& total number of subproblems\\
+{\tt \#open} & current number of open subproblems\\
+{\tt current} & the number of the currently optimized subproblem\\
+{\tt \#iter} & number of iterations in the cutting plane
+  algorithm\\
+{\tt ABA\_LP} & value of the LP-relaxation\\
+{\tt dual} & global dual bound\\
+{\tt primal} & primal bound\\
+\end{tabular}
+
+}
+{\parametervalue{{\tt Silent}}{No output.}
+ \parametervalue{{\tt Statistics}}{Output of the result and some statistics
+                            at the end of the optimization.
+                           }
+ \parametervalue{{\tt Subproblem}}{Additional one-line output after
+ the first solved ABA\_LP of the root node and at the
+                             end of the optimization of each subproblem.}
+ \parametervalue{{\tt LinearProgram}}{Additional one-line output after the
+                                solution of a linear program.}
+  \parametervalue{{\tt Full}}{Detailed output in all phases of the
+    optimization.}
+}
+{{\tt Full}}                    
+
+\parameter
+{LogLevel}
+{We can control the amount of output written to the log file\index{log level}
+ in the same way as the output to the standard output stream.}
+{See parameter {\tt OutputLevel}. If the {\tt LogLevel} is not
+ {\tt Silent} two log files are created. While the file with the
+ name of the problem instance and the extension {\tt .log} contains
+ the output written to {\tt ABA\_MASTER::out()} (filtered according the 
+ {\tt LogLevel}), the all messages written to {\tt ABA\_MASTER::err()}
+ are also written to the file with the name of the problem instance and
+ the extension {\tt .error.log}.}
+{{\tt Silent}}
+
+\parameter
+{PrimalBoundInitMode}
+{This parameter controls the initialization of the primal 
+ bound\index{primal bound!initialization}.
+ The modes {\tt Optimum} and {\tt OptimumOne} are useful for tests.}
+{\parametervalue{{\tt None}}{The primal bound is initialized with
+                       ``infinity'' for minimization problems
+                       and ``minus infinity'' for maximization
+                       problems, respectively.}
+ \parametervalue{{\tt Optimum}}{The primal bound is initialized with the
+                          value of an optimum solution, if it can
+                          be read from the file with the name of the
+                          parameter {\tt OptimumFileName}.
+                         }
+ \parametervalue{{\tt OptimumOne}}{The primal bound is initialized with the
+                             value of an optimum solution plus one
+                             for minimization problems, and the
+                             value of an optimum solutions minus one
+                             for maximization problems. This is only
+                             possible if the value of an optimum solution
+                             can be read from the file with the name given by
+                             the parameter {\tt OptimumFileName}.
+                            }
+}
+{None}
+
+\parameter
+{PricingFrequency}
+{This parameter indicates the number of iterations between two additional
+ pricing steps\index{pricing!frequency}
+ in the cutting plane phase for algorithms performing
+ both constraint and variable generation.
+ If this number is 0, then no additional pricing is performed.
+}
+{A nonnegative integer number.}
+{{\tt 0}}
+
+\parameter
+{SkipFactor}
+{This parameter indicates the frequency of cutting plane and variable
+ generation{skipping!factor}
+ in the subproblems according to the parameter {\tt SkippingMode}. 
+ The value 1 means
+ that cutting planes and variables are generated in every subproblem
+ independent from the skipping mode.
+}
+{A positive integer number.}
+{{\tt 1}}
+
+\parameter
+{SkippingMode}
+{This parameter controls the skipping mode\index{skipping!mode}, 
+ i.e., if constraints or
+ variables are generated in a subproblem.
+}
+{\parametervalue{{\tt SkipByNode}}{Generate constraints and variables
+                                   only every {\tt SkipFactor} processed node.}
+ \parametervalue{{\tt SkipByLevel}}{Generate constraints and variables
+                                    only every {\tt SkipFactor} level in
+                                    the \bab\ tree.}
+}
+{{\tt SkipByNode}}
+
+\parameter
+{FixSetByRedCost}
+{Variables 
+ \index{fixing!by reduced cost}
+ \index{setting!by reduced cost}
+ are fixed and set by reduced cost criteria if and only if this
+ parameter is {\tt true}. 
+ The default setting is {\tt false}, as
+ fixing or setting variables to 0 can make the pricing problem intractable
+ in \bap\ algorithms.
+}
+{{\tt false} or {\tt true}}
+{{\tt false}}
+
+\parameter
+{PrintLP}
+{If this parameter is {\tt true}, then the linear program is output
+ every iteration\index{linear program!output}. 
+ This is only useful for debugging.}
+{{\tt false} or {\tt true}}
+{{\tt false}}
+
+\parameter
+{MaxConAdd}
+{This parameter\index{constraint!maximal added}
+ determines the maximal number of constraints added to the 
+ linear programming
+ relaxation per iteration in the cutting plane algorithm.
+}
+{A nonnegative integer number.}
+{{\tt 100}}
+
+\parameter
+{MaxConBuffered}
+{After\index{constraint!maximal buffered} the cutting plane generation
+ the {\tt MaxConAdd}
+ best constraints are selected from all generated constraints that
+ are kept in a buffer. This parameter indicates the size of this buffer.
+}
+{A nonnegative integer number.}
+{{\tt 100}}
+
+\parameter
+{MaxVarAdd}
+{This\index{variable!maximal added}
+ parameter determines the maximal number of variables added to the 
+ linear programming
+ relaxation per iteration in the cutting plane algorithm.
+}
+{A nonnegative integer number.}
+{{\tt 100}}
+
+\parameter
+{MaxVarBuffered}
+{After\index{variable!maximal buffered}
+ the variable generation the {\tt MaxVarAdd}
+ best variables are selected from all generated variables that
+ are kept in a buffer. This parameter indicates the size of this buffer.
+}
+{A nonnegative integer number.}
+{{\tt 100}}
+
+\parameter
+{MaxIterations}
+{The\index{cutting plane algorithm!maximal iterations}
+ parameter limits the  number of iterations of the cutting plane phase 
+ of a single subproblem.
+}
+{A nonnegative integer number or $-1$ if unlimited.}
+{{\tt -1}}
+
+\parameter
+{EliminateFixedSet}
+{Fixed\index{fixing variables!elimination}
+ \index{setting variables!elimination}
+  and set variables are eliminated from the linear program submitted to the
+ LP-solver if this parameter is {\tt true} and the variable is
+ eliminable. By default, a variable is eliminable if it has not been
+ basic in the last solved linear program.
+}
+{{\tt false} or {\tt true}}
+{{\tt false}}
+
+\parameter
+{NewRootReOptimize}
+{If\index{root node!roptimization}
+ the root of the remaining \bab\ tree changes and this node
+ is not the active subproblem, then we reoptimize this subproblem,
+ if this parameter is {\tt true}. The reoptimization might provide
+ better criteria for fixing variables by reduced costs.
+}
+{{\tt false} or {\tt true}}
+{{\tt false}}
+
+\parameter
+{OptimumFileName}
+{This\index{optimum solution values}
+ parameter indicates the name of a file storing the values of the
+ optimum solutions. Each line of this file consists of a problem name
+ and the value of the corresponding optimum solution.
+ This is the only optional parameter. Having the optimum values of
+ some instances at hand can be very useful in the testing phase.
+}
+{A string.}
+{This parameter is commented out in the file {\tt .abacus}.}
+
+\parameter
+{ShowAverageCutDistance}
+{If\index{average cut distance}
+ this parameter is {\tt true}, then the average Euclidean distance of the
+ fractional solution from the added cutting planes is output every iteration
+ of the cutting plane phase. 
+}
+{{\tt false} or {\tt true}}
+{{\tt false}}
+
+\parameter
+{ConstraintEliminationMode}
+{The\index{constraint!elimination mode}
+  parameter indicates the method how constraints are eliminated in the 
+ cutting plane algorithm.}
+{\parametervalue{{\tt None}}{No constraints are eliminated.}
+ \parametervalue{{\tt NonBinding}}{The non-binding dynamic constraints are eliminated.}
+ \parametervalue{{\tt Basic}}{The dynamic constraints with basic slack variables are eliminated.}
+}
+{{\tt Basic}}
+
+\parameter
+{ConElimEps}
+{The\index{constraint!elimination tolerance}
+ parameter indicates the tolerance for the elimination of constraints
+ by the method {\tt NonBinding}.}
+{A nonnegative floating point number.}
+{{\tt 0.001}}
+
+\parameter
+{ConElimAge}
+{The number of iterations an elimination criterion for a constraint
+ must be satisfied until the constraint is eliminated from the active
+ constraints.}
+{A nonnegative integer.}
+{{\tt 1}}
+
+\parameter
+{VariableEliminationMode}
+{This\index{variable!elimination mode}
+ parameter indicates the method how variables are eliminated in a 
+ column generation algorithm.}
+{\parametervalue{{\tt None}}{No variables are eliminated.}
+ \parametervalue{{\tt ReducedCost}}
+                 {Nonbasic dynamic variables that are neither fixed nor set
+                  and for which the absolute value of the
+                  reduced costs exceeds the value given by the parameter
+                  {\tt VarElimEps} are removed.
+                 }
+}
+{{\tt ReducedCost}}
+
+\parameter
+{VarElimEps}
+{This\index{variable!elimination tolerance}
+ parameter indicates the tolerance for the elimination of variables 
+ by the method {\tt ReducedCost}.}
+{A nonnegative floating point number.}
+{{\tt 0.001}}
+
+\parameter
+{VarElimAge}
+{The number of iterations an elimination criterion for a variable
+ must be satisfied until the variable is eliminated from the active
+ variables.}
+{A nonnegative integer.}
+{{\tt 1}}
+
+
+\parameter
+{VbcLog}
+{This parameter\index{VBC-tool}
+ indicates if a log-file of the enumeration tree should be
+ generated, which can be read by the VBC-tool \cite{Lei96}. The VBC-tool
+ is a utility for the visualization of the \bab\ tree.}
+{\parametervalue{{\tt None}}{No file for the VBC-Tool is generated.}
+ \parametervalue{{\tt File}}{The output is written to a file with the 
+                             name {\tt <name>.<pid>.tree}. {\tt <name>}
+                             is the problem name as specified in the
+                             constructor of the class {\tt ABA\_MASTER} and
+                             {\tt <pid>} is the process id.}
+ \parametervalue{{\tt Pipe}}{The control instructions for the VBC-Tool
+                             are written to the global output stream.
+                             Each control instuction starts with a \$
+                             sign. If the standard output of an \ABACUS\
+                             application is piped through the VBC-Tool,
+                             lines starting with a \$ sign are regarded
+                             as control instructions, all other lines 
+                             written to a text window.}
+}
+{{\tt None}}
+
+\parameter
+{NBranchingVariableCandidates}
+{This number indicates how many candidates for branching variables
+should be tested according to the {\tt BranchingStrategy}. If this
+number is 1, a single variable is determined (if possible) that
+is the branching variable. If this number is greater than 1
+each candidate is tested and the best branching variable is
+selected, i.e., for each candidate the two linear programs of
+potential sons are solved. The variable for which the minimal
+change of the two objective function values is maximal is selected
+as branching variable.}
+{Positive integer number.}
+{1}
+
+\parameter
+{DefaultLpSolver}
+{This parameter determines the LP-solver that should be applied per
+  default for each subproblem. Please note that these are the solvers
+  supported by the {\tt Open Solver Interface} and hence by \ABACUS\.
+  Nevertheless not all of these solvers may be suitable for solving LP 
+  relaxations.}
+{\parametervalue{{\tt Cbc}}{}
+ \parametervalue{{\tt Clp}}{}
+ \parametervalue{{\tt CPLEX}}{}
+ \parametervalue{{\tt DyLP}}{}
+ \parametervalue{{\tt FortMP}}{}
+ \parametervalue{{\tt GLPK}}{}
+ \parametervalue{{\tt MOSEK}}{}
+ \parametervalue{{\tt OSL}}{}
+ \parametervalue{{\tt SoPlex}}{}
+ \parametervalue{{\tt SYMPHONY}}{}
+ \parametervalue{{\tt Vol}}{}
+ \parametervalue{{\tt XPRESS\_MP}}{}
+}
+{{\tt Clp}}
+
+\parameter
+{SolveApprox}
+{If set to true usage of the Volume Algorithm to solve LP relaxations is enabled.
+\index{Volume Algorithm}
+\index{SolveApprox}
+\index{solveApproxNow()}
+This parameter only enables usage of the approximate solver in general. Whether or
+not a specific LP relaxation is solved exact or approximate is determined by the 
+function {\tt ABA\_MASTER::solveApproxNow()}.}
+For an example reimplementation of this function see the file {\tt tspsub.w}
+in the {\tt example} directory of the \ABACUS\ source code.
+{{\tt false} or {\tt true}}
+{{\tt false}}
+
+\subsection{Solver Parameters}
+\label{section:solverparameters}
+\index{solver parameters}
+Setting parameters for specific LP-solvers is done by redefining the virtual function
+{\tt ABA\_MASTER::setSolverParameters(OsiSolverInterface* interface, bool solverIsApprox)}.
+The parameter {\tt interface} is a generic pointer to an object of type 
+{\tt OsiSolverInterface}, it has to be typecast to a pointer to a specific solver
+interface. Via this pointer all the internals of the solver can be accessed.
+The parameter {\tt solverIsApprox} is true if the solver for which parameters
+are set is approximate, i.e. the Volume Algorithm.
+To set the primal column pivot algorithm for Clpi to "steepest", for example,
+one would do:
+\begin{verbatim}
+bool MYMASTER::setSolverParameters(OsiSolverInterface*interface,bool solverIsApprox)
+{
+OsiClpSolverInterface* clpIf = dynamic_cast<OsiClpSolverInterface*> (interface);
+ClpSimplex* clp_simplex = clpIf->getModelPtr();
+ClpPrimalColumnSteepest steepestP;
+clp_simplex->setPrimalColumnPivotAlgorithm(steepestP);
+return true;
+}
+\end{verbatim}
+For a more complex reimplementation of this function see the file {\tt tspmaster.w}
+in the {\tt example} directory of the \ABACUS\ source code.
+
+\subsection{Parameter Handling}
+\label{section:parameterHandling}
+\index{parameter file}
+\noindent
+\ABACUS\ provides a concept for the implementation
+of application parameter files, which is very easy to use. 
+In these files it is both possible
+to overwrite the values of parameters already defined in the file
+{\tt .abacus}\index{.abacus@{\tt .abacus}}
+and to define extra parameters for the new application.
+
+The format for parameter files is very simple. Each line
+contains the name of a parameter separated by an arbitrary number
+of whitespaces from its value. Both parameter name and parameter value
+can be an arbitrary character string. A line may have at most 1024
+characters. Empty lines are allowed. All lines starting with a
+`\#' are considered as comments.
+
+The following lines give an example for the parameter file
+{\tt .myparameters}.
+
+{\ttfamily
+\begin{tabbing}
+EnumerationStrategy   \=                 \kill
+\#\\
+\# First, we overwrite two parameters from the file .abacus.\\
+\#\\
+EnumerationStrategy\>DepthFirst\\
+OutputLevel\>LinearProgram\\
+\#\\
+\#\\
+\# Here are the parameters of our new application.\\
+\#\\
+\#\\
+\# Our application has two different separation strategies\\
+\# 'All' calls all separators in each iteration\\
+\# 'Hierarchical' follows a hierarchy of the separators\\
+\#\\
+SeparationStrategy\>All\\
+\#\\
+\# The parameter MaxNodesPerCut limits the number of nodes involved\\
+\# in a cutting plane that is defined by a certain subgraph.\\
+\#\\  
+MaxNodesPerCut\>1000\\
+\end{tabbing}
+}
+
+\bigskip\noindent
+Here, we suppose that the class {\tt MYMASTER}
+has two members that are initialized from the parameter file.
+
+\begin{verbatim}
+  class MYMASTER : public ABA_MASTER {
+    /* public and protected members */
+    private:
+      enum SEPSTRAT {All,Hierachical};
+      ABA_STRING separationStrategy_;
+      int maxNodesPerCut_;
+      /* other private members */
+   };
+\end{verbatim}
+
+\noindent
+The parameter file can be read by redefining the virtual function
+{\tt initializeParameters()}, which does nothing in its default 
+implementation.
+\index{ABA\_MASTER@{\tt ABA\_MASTER}!initializeParameters@{\tt initializeParameters}} 
+
+Parameter files having our format can be read by the 
+function {\tt ABA\_GLOBAL::readParameters()}, which inserts all parameters in a table.
+Then, the parameters can be extracted from the table with the
+functions {\tt ABA\_GLOABAL::assignParameter()}, {\tt
+ABA\_GLOABAL::findParameter()}, {\tt ABA\_GLOABAL::getParameter()}
+which are overloaded in different ways.
+\index{ABA\_GLOBAL@{\tt ABA\_GLOBAL}!getParameter@{\tt getParameter}}
+\index{ABA\_GLOBAL@{\tt ABA\_GLOBAL}!findParameter@{\tt findParameter}}
+\index{ABA\_GLOBAL@{\tt ABA\_GLOBAL}!assignParameter@{\tt assignParameter}}
+
+For our application, the code could look like
+\begin{verbatim}
+  void MYMASTER::initializeParameters()
+  {
+    readParameters(".myparameters");
+
+    /* terminate the program if the parameters are not found
+       in the table (which was filled by readParamters() ) */
+
+    const char* SeparationStrategy[]={"All","Hierachical"};
+    separationStrategy_=(SEPSTRAT)
+      findParameter("SeparationStrategy",2, SeparationStrategy);
+
+    /* allow only values between 1 and 5000; */
+    assignParameter(maxNodesPerPerCut_, "MaxNodesPerCut", 1, 5000);
+
+  }
+\end{verbatim}
+
+
+Parameters of the base class {\tt ABA\_MASTER} that are redefined in the file
+{\tt .myparameters} do not have to be extracted explicitly, but are
+initialized automatically.
+Note, the parameters specified in the file {\tt .abacus} are read
+in the constructor of the class {\tt ABA\_MASTER}, but an application specific
+parameter file is read when the optimization starts (function {\tt
+  ABA\_MASTER::optimize()}).
+
+
+A \bac\ optimization can be performed even without reading
+the file {\tt .abacus}. This can be achieved by setting the 8th
+parameter of the constructor of {\tt ABA\_MASTER} to {\tt false}. 
+In this case, \ABACUS\ starts with default settings for the
+parameters, which can be overwritten by the function 
+{\tt ABA\_GLOBAL::insertParameter()}.
+

@@ -1,0 +1,407 @@
+#
+# Configuration file for abacus
+#
+
+#
+# ENUMERATION STRATEGY
+# 
+#   valid settings: BestFirst    (best first search)
+#                   BreadthFirst (breadth first search)
+#                   DepthFirst   (depth first search)
+#                   Dive    (first depth, later best first search)
+#
+EnumerationStrategy		BestFirst
+
+#
+# BRANCHING STRATEGY
+#   valid settings: CloseHalf (select variable with fraction closest to 0.5)
+#                   CloseHalfExpensive (select variable close to 0.5 having
+#                   high absolute objective function coefficient)
+#
+#
+BranchingStrategy		CloseHalfExpensive
+
+#
+# TESTING BRANCHING VARIABLES
+#
+#   this number indicates how many candidates for branching variables
+#   should be tested according to the BranchingStrategy. If this
+#   number is 1, a single variable is determined (if possible) that
+#   is the branching variable. If this number is greater than 1
+#   each candidate is tested and the best branching variable is
+#   selected, i.e., for each candidate the two linear programs of
+#   potential sons are solved. The variable for which the minimal
+#   change of the two objective function values is maximal is selected
+#   as branching variable.
+#
+#   valid settings: positive integer number
+#
+NBranchingVariableCandidates	1
+
+#
+# SOLUTION GUARANTEE
+#
+#   valid settings: any nonnegative floating point number
+#                   0.0 indicates solution to optimality
+#
+Guarantee			0.0
+
+#
+# MAXIMAL LEVEL IN ENUMERATION TREE
+#
+#   valid settings: any positive integer
+#                   1 = then no branch and bound is performed, pure cutting
+#                       plane algorithm
+#
+MaxLevel			999999
+
+#
+# MAXIMAL CPU TIME
+#
+#   valid settings: string in the format hours:minutes:seconds
+#                   the string converted to seconds must be less than MAX_INT
+#
+MaxCpuTime			99999:59:59
+
+#
+# MAXIMAL CLOCK OF THE WALL TIME
+#
+#   valid settings: string in the format hours:minutes:seconds
+#                   the string converted to seconds must be less than MAX_INT
+#
+MaxCowTime			99999:59:59
+
+# 
+# INTEGRALITY OF OBJECTIVE FUNCTION VALUES OF FEASIBLE SOLUTIONS
+# 
+#   valid settings: true/false
+#
+ObjInteger			false
+
+#
+# NUMBER OF LPS CONSIDERED IN TAILING OFF ANALYSIS
+#
+#  valid settings: positive integer    => tailing off control
+#                  nonpositive integer => no tailing off control 
+#
+TailOffNLps			0
+
+# 
+# MINIMAL IMPROVEMENT IN TAILING OFF ANALYSIS IN PERCENT
+#
+#   valid settings: any nonnegative floating point number
+#
+TailOffPercent			0.0001
+
+#
+# THRESHOLD FOR DELAYED BRANCHING
+# 
+#   valid settings: any nonnegative integer
+#                   0 = immediate branching after first subproblem optimization
+#
+DelayedBranchingThreshold	0
+
+#
+# THE MINIMAL NUMBER OF ROUNDS A SUBPROBLEM STAYS DORMANT
+#
+# valid settings: a positive integer
+#
+MinDormantRounds		1
+
+#
+# OUTPUT LEVEL
+#
+# valid settings: Silent
+#                 Statistics
+#                 Subproblem
+#                 LinearProgram
+#                 Full
+#
+OutputLevel			Full
+
+#
+# SHOULD THE OUTPUT BE ALSO WRITTEN TO A LOGFILE
+#
+# valid settings: see OutputLevel
+#
+LogLevel			Full
+
+#
+# PRIMAL BOUND INITIALIZATION MODE
+#
+#   valid settings: None
+#                   Optimum
+#                   OptimumOne
+#
+PrimalBoundInitMode		None
+
+#
+# PRICING FREQUENCY
+#
+#   valid settings: any nonnegative integer
+#
+PricingFrequency		0
+
+#  
+# SKIP FACTOR FOR CUTTING
+#
+#   valid settings: any nonnegative integer
+#
+SkipFactor			1
+
+#
+# SKIPPING MODE
+#   valid settings: SkipByNode  => skipping according to number of nodes
+#                   SkipByLevel => skipping according to level in tree
+#
+SkippingMode			SkipByNode
+
+#
+# SHOULD VARIABLES BY FIXED AND SET BY REDUCED COST
+#
+FixSetByRedCost			true
+
+#
+# SHOULD THE LP BE OUTPUT EVERY ITERATION
+#
+PrintLP				true
+
+
+#
+# THE MAXIMAL NUMBER OF CONSTRAINTS ADDED PER ITERATION
+#
+MaxConAdd			100
+
+#
+# THE MAXIMAL NUMBER OF CONSTRAINTS BUFFERED PER ITERATION
+#
+MaxConBuffered			100
+
+#
+# THE MAXIMAL NUMBER OF VARIABLES ADDED PER ITERATION
+#
+MaxVarAdd			500
+
+#
+# THE MAXIMAL NUMBER OF VARIABLES BUFFERED PER ITERATION
+#
+MaxVarBuffered			500
+
+#
+# THE MAXIMAL NUMBER OF ITERATIONS IN THE CUTTING PLANE PHASE
+#   -1 = unlimited
+#
+MaxIterations			-1
+
+#
+# ELIMINATE FIXED AND SET VARIABLES FROM THE LP
+#
+EliminateFixedSet		false
+
+#
+# REOPTIMIZE NEW ROOT OF REMAINING BRANCH AND CUT TREE
+#
+NewRootReOptimize		false
+
+#
+# NAME OF THE FILE STORING THE OPTIMUM SOLUTIONS
+#
+# OptimumFileName 
+#
+#   this is only an optional parameter
+
+#
+# SHOW THE AVERAGE DISTANCE OF THE CUTS PER ITERATION
+#
+ShowAverageCutDistance		false
+
+#
+# CONSTRAINT ELIMININATION
+#
+#
+# valid settings: None
+#                 NonBinding
+#                 Basic
+#
+ConstraintEliminationMode	 Basic
+
+#
+# TOLERANCE FOR CONSTRAINT ELIMINATION
+# 
+# This tolerance is only of relevance for the constraint elimination
+# mode NonBinding.
+#
+ConElimEps			0.001
+
+#
+# THE AGE FOR CONSTRAINT ELIMINATION
+#
+# 
+# The number of iterations an elimination criterion for a constraint
+# must be satisfied until the constraint is eliminated from the active
+# constraints.
+#
+# valid settings: a nonnegative integer number
+
+ConElimAge                      1
+
+#
+# VARIABLE ELIMINATION MODE
+#
+# valide settings: None
+#                  ReducedCost
+#
+VariableEliminationMode		ReducedCost
+
+#
+# TOLERANCE FOR VARIABLE ELIMINATION
+#
+VarElimEps			0.001
+
+#
+# THE AGE FOR VARIABLE ELIMINATION
+#
+# 
+# The number of iterations an elimination criterion for a variable
+# must be satisfied until the variable is eliminated from the active
+# variables.
+#
+# valid settings: a nonnegative integer number
+
+VarElimAge                      1
+
+#
+# GENERATION OF A LOG-FILE OF THE ENUMERATION TREE
+#
+# valid settings: None
+#                 File
+#                 Pipe
+
+VbcLog				None
+
+#
+# VbcPipeName is an optional parameter which defines the name of a
+# "named pipe" on which visualization output is sent instead of the
+# standard output if VbcLog=Pipe.
+#
+# When using a named pipe the VBC tool for online tree visualization can
+# independantly be started before abacus is started. The communication is
+# done via the named pipe. (see unix manual page for "mknod name p")
+#
+# http://www.informatik.uni-koeln.de/ls_juenger/projects/vbctool.html
+# contains more information on the VBC tool.
+#
+
+VbcPipeName			../vbcSolaris/pipe
+
+#
+# THE DEFAULT LP-SOLVER
+#
+# valid settings: Cbc
+#                 Clp
+#                 CPLEX
+#                 DyLP
+#                 FortMP
+#                 GLPK
+#                 MOSEK
+#                 OSL
+#                 SoPlex
+#                 SYMPHONY
+#                 Vol
+#                 XPRESS_MP 
+
+DefaultLpSolver        Clp
+
+#
+# USE THE THE APPROXIMATE SOLVER
+#
+
+SolveApprox   false
+
+########################################################################
+########################################################################
+
+
+#
+# The parameters below are specific to the parallel version of ABACUS
+#
+
+#
+# THE NUMBER OF HOSTS
+#
+
+ParallelHostCount		3
+
+#
+# THE HOSTNAMES
+#
+# These parameters have the form "ParallelHostname_%d" where
+# %d = 0 ... ParallelHostCount-1
+#
+# The paralell ABACUS executable has to be started on each host.
+# This can be done by using the "start" script which parses this
+# file to determine the hostnames.
+#
+# The hostnames must be different from each other!
+#
+
+ParallelHostname_0		rubens
+ParallelHostname_1		frueh
+ParallelHostname_2		sion
+
+#
+# BEST FIRST SEARCH TOLERANCE
+#
+# this parameter controls the strategy for selecting the next subproblem to
+# be processed by the Branch&Bound algorithm. Candidates for the next
+# subproblem to be selected are the subproblem with the best bound of the
+# local list of open subproblems and the subproblem with global best bound.
+#
+# The parameter ParallelBestFirstTolerance specifies the accepted
+# tolerance of the dual bound of the best subproblem in the local list
+# with respect to the intervall [global best dual bound, best primal bound]
+# in percent.
+#
+# ParallelBestFirstTolerance =   0     means GLOBAL BEST FIRST
+# ParallelBestFirstTolerance = 100     means LOCAL BEST FIRST
+#
+# values inbetween can be used to reduce communication while nearly
+# maintaining a global best first order.
+#
+
+ParallelBestFirstTolerance	0
+
+#
+# THE DEBUG LEVEL
+#
+# the debug level can be any combination (sum) of the following bitmasks
+#
+#   DEBUG_MESSAGE_CONVAR      1
+#   DEBUG_MESSAGE_SUB         2
+#   DEBUG_NOTIFICATION        4
+#   DEBUG_BALANCER            8
+#   DEBUG_TERMINATION         16
+#   DEBUG_SOCKET              32
+#   DEBUG_SEPARATE            64
+#   DEBUG_SUBSERVER           128
+
+ParallelDebugLevel		0
+
+#
+# THE CONNECTION TIMEOUT
+#
+# timeout for connecting to other hosts in seconds
+#
+
+ParallelConnectTimeout		30
+
+#
+# THE PORT NUMBERS
+#
+# unix port numbers to be used for socket communication
+#
+
+ParallelNotifyPort		23463
+ParallelSubproblemPort		23464
+ParallelBalancerPort		23465
+
