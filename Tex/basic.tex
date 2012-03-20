@@ -1,0 +1,745 @@
+% $Id: basic.tex,v 2.2 2007-07-24 16:02:27 baumann Exp $
+
+\chapter{Using ABACUS}
+\label{chapter:UsingAbacus}
+
+Section~\ref{section:UsingAbacusBasics} provides the basic guidelines 
+how a new application can be attacked with the help of \ABACUS. While
+this section describes the first steps a user should follow, we discuss
+in Section~\ref{section:UsingAbacusAdvanced}
+advanced features, in particular how default strategies
+can be modified according to problem specific requirements.
+
+We strongly encourage to study this chapter together with the example
+of the \ABACUS\ distribution. In this example all concepts of
+Section~\ref{section:UsingAbacusBasics} and several features of 
+Section~\ref{section:UsingAbacusAdvanced} can be found.
+
+In the following sections we also present pieces of \CPLUSPLUS\ code.
+When we discuss variables that are of the type ``pointer to some type'',
+then we usually omit for convenience of presentation the ``pointer to''
+and the operator $*$ if there is no danger of confusion.
+For instance, given the variable
+\begin{verbatim}
+  ABA_ARRAY<ABA_CONSTRAINT*> *constraints;
+\end{verbatim}
+we also say ``the constraints are stored in the array {\tt constraints}''
+instead of ``the pointer to constraints are stored in the array
+{\tt *constraints}''.
+
+
+In order to simplify the use \ABACUS\ we are using the following style
+for the names of classes, functions, variables, and enumerations.
+\index{naming style}
+
+\begin{itemize}
+\item  Names of classes (e.g., {\tt class ABA\_COLUMN}), 
+       names of enumerations (e.g., {\tt enum VARELIMMODE}), 
+       and character strings associated with an enumeration
+       (e.g., {\tt const char* VARELIMMODE\_[]})       
+       are written with upper case letters.
+
+\item  Members of enumerations begin with an upper case letter,
+       e.g., {\tt enum STATUS\{Fixed, Set\}}.
+
+\item All other names (functions, objects, variables, function
+         arguments) start with a lower case letter
+         (e.g., {\tt optimize()}).
+
+\item We use upper case letters within all names to increase the
+      readability (e.g., {\tt generateSon()}).
+
+\item Names of data members of classes end with an underscore
+          such that they can be easily distinguished from local
+          variables of member functions.
+
+\item We do not refrain from using a long name if it helps
+      expressing the concepts behind the name.
+\end{itemize}
+
+
+\section{Basics}
+\label{section:UsingAbacusBasics}
+
+In this section we explain how our framework is used for the implementation
+of a new application. 
+This section should provide only the guidelines for the first steps
+of an implementation, for
+details we refer to Section~\ref{section:UsingAbacusAdvanced}
+and to the documentation in the reference manual.
+
+If we want to use \ABACUS\ for a new application we have to derive problem
+specific classes from some base classes. Usually, only four base classes
+of \ABACUS\ are involved: {\tt ABA\_VARIABLE}, {\tt ABA\_CONSTRAINT}, 
+{\tt ABA\_MASTER}, and {\tt SUBPROBLEM}. For some applications it is
+even possible that the classes {\tt ABA\_VARIABLE} and/or {\tt ABA\_CONSTRAINT}
+are not included in the derivation process if those concepts
+provided already by \ABACUS\ are sufficient. By the definition of some
+pure virtual functions of the base classes in the derived classes and
+the redefinition of some virtual functions a problem specific algorithm
+can be composed. Figure~\ref{figure:derive} shows how the problem
+specific classes {\tt MYMASTER}, {\tt MYSUB}, {\tt MYVARIABLE}, and
+{\tt MYCONSTRAINT} are embedded in the inheritance graph of \ABACUS.
+
+\begin{figure}
+\centerline{
+  \psfig{figure=figures/derive.ps,width=150truemm}
+}
+\caption{Embedding problem specific classes in \ABACUS.}
+\label{figure:derive}
+\end{figure}
+
+
+Throughout this section we only use the default pool concept of \ABACUS,
+i.e., we have one pool for static constraints, one pool for
+dynamically generated cutting planes,
+and one pool for variables. We will outline how an application specific
+pool concept can be implemented in Section~\ref{section:otherPools}.
+
+\subsection{Constraints and Variables}
+\index{constraint}
+\index{variable}
+
+The first step in the implementation of a new application is the analysis
+of its variable and constraint structure. We require at least one
+constraint class derived from the 
+class~{\tt ABA\_CONSTRAINT}\index{ABA\_CONSTRAINT@{\tt ABA\_CONSTRAINT}} and at least one
+variable class derived from the class {\tt ABA\_VARIABLE}\index{ABA\_VARIABLE@{\tt ABA\_VARIABLE}}. 
+The used variable
+and constraint classes have to match such that a row or a column
+of the constraint matrix of an LP-relaxation can be generated.
+
+We derive from the class {\tt ABA\_VARIABLE} the class {\tt MYVARIABLE} storing
+the attributes specific to the variables of our application, e.g.,
+its number, or the tail and the head of the associated edge of a graph.
+
+Then we derive the class {\tt MYCONSTRAINT} from the class
+{\tt ABA\_CONSTRAINT}
+\begin{verbatim}
+class MYCONSTRAINT : public ABA_CONSTRAINT {
+  public:
+    virtual double coeff(ABA_VARIABLE *v);
+};
+\end{verbatim}
+The function {\tt  ABA\_CONSTRAINT::coeff(ABA\_VARIABLE *v)}
+is a pure virtual function. Hence, we define it in the class
+{\tt MYCONSTRAINT}. It returns the coefficient of variable {\tt v}
+in the constraint.
+Usually, we need in an implementation of the function
+{\tt coeff(ABA\_VARIABLE *v)}
+access to the application specific attributes of the variable {\tt v}.
+Therefore, we have to cast {\tt v} to a pointer to an object of the 
+class {\tt MYVARIABLE} for the computation of the coefficient of {\tt v}.
+Such that this cast can be performed safely, the variables and constraints
+used within an application have to be compatible. If run time type
+information (RTTI) is supported
+on your system, these casts can be performed safely.
+
+The function {\tt coeff()} is used within the framework when the row
+format of a constraint is computed, e.g., when the linear program
+is set up, or a constraint is added to the linear program.
+When the column associated with a variable is generated, then the virtual
+member function {\tt coeff()} of the class {\tt ABA\_VARIABLE} is used, which
+is in contrast to the function~{\tt coeff()} of the class {\tt ABA\_CONSTRAINT}
+not an abstract function:
+\begin{verbatim}
+  double ABA_VARIABLE::coeff(ABA_CONSTRAINT *con)
+  {
+    return con->coeff(this);
+  }
+\end{verbatim}
+This method of defining the coefficients of the constraint matrix via
+the constraints of the matrix originates from cutting plane algorithms.
+Whereas in a column generation algorithm we usually have a different view on the 
+problem, i.e., the coefficients of the constraint matrix are defined
+with the help of the variables. In this case, it is appropriate to define
+the function {\tt MYCONSTRAINT::coeff(ABA\_VARIABLE *v)} analogously to the function 
+{\tt ABA\_VARIABLE::coeff(ABA\_CONSTRAINT *v)} and to define the the function
+{\tt MYVARIABLE::coeff(ABA\_CONSTRAINT *v)}.
+
+
+\ABACUS\ provides two constraint/variable pairs in its application independent
+kernel.
+The most simple one is where each variable is identified by
+an integer number (class {\tt ABA\_NUMVAR}\index{ABA\_NUMVAR@{\tt ABA\_NUMVAR}}) and each 
+constraint is represented
+by its nonzero coefficients and the corresponding number of the variables
+(class {\tt ABA\_ROWCON}\index{ABA\_ROWCON@{\tt ABA\_ROWCON}}). We use this constraint/variable pair
+for general \mip s.
+
+The constraint/variable pair 
+{\tt ABA\_NUMCON}\index{ABA\_NUMCON@{\tt ABA\_NUMCON}}/{\tt ABA\_COLVAR}\index{ABA\_COLVAR@{\tt ABA\_COLVAR}} is dual to the previous
+one. Here the constraints are given by an integer number, but we store
+the nonzero coefficients and the corresponding row numbers for each variable.
+Therefore, this constraint/variable pair is useful for column generation algorithms.
+
+\ABACUS\ is not restricted to a single constraint/variable pair within
+one application. There can be an arbitrary number of constraint and variable
+classes. It is only required that the coefficients of the constraint
+matrix can be safely computed for each constraint/variable pair.
+
+\subsection{The Master}
+\index{master}
+
+There are two main reasons why we require a problem specific master 
+of the optimization. The first reason is that we have to embed
+problem specific data members like the problem formulation.
+The second reason is the initialization of the first subproblem, i.e., the
+root node of the \bab\ tree has to be initialized with a subproblem
+of the class {\tt MYSUB}. Therefore, a problem specific master
+has to be derived from the class {\tt ABA\_MASTER}\index{ABA\_MASTER@{\tt ABA\_MASTER}}:
+\begin{verbatim}
+class MYMASTER : public ABA_MASTER {};
+\end{verbatim}
+
+\subsubsection{The Constructor}
+
+Usually, the input data is read from a file by the constructor or they are
+specified by the arguments of the constructor. 
+
+From the constructor of the class {\tt MYMASTER} the constructor of the base 
+class {\tt ABA\_MASTER} must be called:
+\begin{verbatim}
+  ABA_MASTER(const char *problemName, bool cutting, bool pricing,
+             ABA_OPTSENSE::SENSE optSense = ABA_OPTSENSE::Unknown,
+             double eps = 1.0e-4, double machineEps = 1.0e-7,
+             double infinity = 1.0e32);
+\end{verbatim}\index{ABA\_MASTER@{\tt ABA\_MASTER}!Constructor@{\tt Constructor}}
+Whereas the first three arguments are mandatory, the other ones are
+optional.
+
+\begin{center}
+\begin{tabular}[b]{lp{0.75\textwidth}}
+  {\tt problemName}&The name of the problem being solved.\\
+  {\tt cutting}    &If {\tt true}, then cutting planes are generated.\\
+  {\tt pricing}    &If {\tt true}, then inactive variables are priced out.\\
+  {\tt optSense}   &The sense of the optimization.\\
+  {\tt eps}        &A zero-tolerance used within all member functions of
+                    objects that have a pointer to this global object.\\
+  {\tt machineEps} &Another zero tolerance to compare a
+                    value of a floating point variable with 0. This value
+                    is usually less than {\tt eps}, because 
+                    {\tt eps} includes
+                    some ``safety'' tolerance, e.g., to test if a constraint
+                    is violated.\\
+  {\tt infinity}   &All floating point numbers greater than {\tt infinity} are
+                    regarded as ``infinitely big''.
+		    Please note that this value might be different from 
+		    the value the LP-solver uses internally.
+		    You should make sure that the value used here is always 
+		    greater than or equal to the value used by the solver.\\
+\end{tabular}
+\end{center}
+
+An optional argument of the constructor of the class {\tt ABA\_MASTER}
+is the sense of the optimization. For some problems (e.g., the
+\bcsp\ or the \tsp) the sense of the optimization is already 
+known when this constructor is called. For other problems
+(e.g, the \mip) the sense of the optimization is determined later when
+the input data is read in the constructor of the specific application.
+In this case, the sense of the optimization has to be initialized
+explicitly
+before the optimization is started with the function {\tt optimize()}.
+
+The following example of a constructor for the class {\tt MYMASTER} sets up
+the master for a \bac\ algorithm and initializes the optimization sense
+explicitly as it is read from the input file.
+\begin{verbatim}
+  MYMASTER::MYMASTER(const char *problemName) :
+    ABA_MASTER(problemName, true, false),
+  {
+    // read the data from the file problemName
+    if (/* problemName is a minimization problem*/)
+      initializeOptSense(ABA_OPTSENSE::Min);
+    else
+      initializeOptSense(ABA_OPTSENSE::Max);
+  }
+\end{verbatim}
+
+\subsubsection{Initialization of the Constraints and Variables}
+
+The constraints and variables that are not generated dynamically, e.g., the
+degree constraints of the \tsp\ or the constraints and variables of the
+problem formulation of a general \mip, have to
+be set up and inserted in pools in a member function of 
+the class {\tt MYMASTER}. These initializations
+can be also performed in the constructor, but we recommend to use
+the virtual dummy function 
+{\tt initializeOptimization()}\index{ABA\_MASTER@{\tt ABA\_MASTER}!initializeOptimization@{\tt initializeOptimization}}
+for this purpose,
+which is called after the optimization
+is started with the function {\tt optimize()}.
+
+By default, \ABACUS\ provides three different pools\index{pool}: 
+one for variables
+and two for constraints. The first constraint pool stores the constraints
+that are not dynamically generated and with which the first LP-relaxation
+of the first subproblem is initialized. The second constraint pool is
+empty at the beginning and is filled up with dynamically generated cutting
+planes. In general, \ABACUS\ provides a more flexible pool concept to
+which we will come back later, but for many applications the default 
+pools are sufficient.
+
+After the initial variables and constraints are generated they have to be 
+inserted into the default pools by calling the function
+\begin{verbatim}
+  virtual void initializePools(ABA_BUFFER<ABA_CONSTRAINT*> &constraints,
+                               ABA_BUFFER<ABA_VARIABLE*>   &variables,
+                               int                          varPoolSize,
+                               int                          cutPoolSize,
+                               bool                         dynamicCutPool = false);
+\end{verbatim}
+\index{ABA\_MASTER@{\tt ABA\_MASTER}!initializePools@{\tt initializePools}}
+Here, {\tt constraints} are the initial constraints, {\tt variables} are
+the initial variables, {\tt varPoolSize} is the initial size of the variable pool,
+and {\tt cutPoolSize} is the initial size of the cutting plane pool. The 
+size of the variable pool is always dynamic, i.e., this pool is increased
+if required. By default, the size of the cutting plane pool is fixed,
+but it becomes dynamic if the argument {\tt dynamicCutPool} is {\tt true}.
+
+There is second version of the function |initializePools()| that
+allows the insertion of an initial set of cutting planes into the cut
+pool\index{pool!initial cutting planes}.
+
+The function {\tt initializeOptimization()} can be also used to determine
+a feasible solution by a heuristic such that the primal bound can
+be initialized.
+
+Hence, the function {\tt initializeOptimization()} could look as follows
+under the assumption that the functions {\tt nVar()} and {\tt nCon()}
+are defined in the class {\tt MYMASTER} and return the number of variables
+and the number of the constraints, respectively.  In the example
+we initialize the size of the cut pool with {\tt 2*nCon()}.
+As the arguments
+of the constructors of the classes {\tt MYVARIABLE} and {\tt MYCONSTRAINT} are
+problem specific we replace them by ``\dots''.
+
+After the pools are set up the primal bound is initialized with
+the value of a feasible solution returned by the function {\tt myHeuristic()}.
+While the initialization of the pools is mandatory the initialization
+of the primal bound is optional.
+\begin{verbatim}
+  void MYMASTER::initializeOptimization()
+  {
+    ABA_BUFFER<ABA_VARIABLE*> variables(this, nVar());
+    for (int i = 0; i < nVar(); i++)
+      variables.push(new MYVARIABLE(...));
+    ABA_BUFFER<ABA_CONSTRAINT*> constraints(this, nCon());
+    for (i = 0; i < nCon(); i++)
+      constraints.push(new MYCONSTRAINT(...));
+    initializePools(constraints, variables, nVar(), 2*nCon());
+    primalBound(myHeuristic());
+  }
+\end{verbatim}
+
+\subsubsection{The First Subproblem}
+
+The root of the \bab\ tree has to be initialized with an object of the
+problem specific subproblem class {\tt MYSUB}, which is derived from the
+class {\tt ABA\_SUB}\index{ABA\_SUB@{\tt ABA\_SUB}}. 
+This initialization must be performed by a definition
+of the pure virtual function {\tt firstSub()}, which returns a pointer
+to the first subproblem. In the following example we assume that
+the constructor of the class {\tt MYSUB} for the root node of the
+enumeration tree has only a pointer to the associated master as argument.
+\begin{verbatim}
+  ABA_SUB *MYMASTER::firstSub()
+  {
+    return new MYSUB(this);
+  }
+\end{verbatim}\index{ABA\_SUB@{\tt ABA\_SUB}!firstSub@{\tt firstSub}}
+
+\subsection{The Subproblem}
+
+Finally, we have to derive a problem specific subproblem from the class
+{\tt ABA\_SUB}\index{ABA\_SUB@{\tt ABA\_SUB}}:
+\begin{verbatim}
+  class MYSUB : public ABA_SUB {};
+\end{verbatim}
+Besides the constructors only two pure virtual functions of the base
+class {\tt ABA\_SUB} have to be defined, which check if a solution of the 
+LP-relaxation is a feasible solution of the \mip, and generate the
+sons after a branching step, respectively. Moreover, the main functionality
+of the problem specific subproblem is to enhance the \bab\ algorithm
+with dynamic variable and constraint generation and sophisticated
+primal heuristics.
+
+\subsubsection{The Constructors}
+\index{ABA\_SUB@{\tt ABA\_SUB}!Constructor@{\tt Constructor}}
+
+The class {\tt ABA\_SUB} has two different constructors: one for the root node
+of the optimization and one for all other subproblems of the optimization.
+This differentiation is required as the constraint and variable set
+of the root node can be initialized explicitly, whereas for the other nodes
+this data is copied from the father node and possibly modified by
+a branching rule. Therefore, we also have 
+to implement these two constructors for the class {\tt MYSUB}.
+
+The root node constructor for the class {\tt ABA\_SUB} must be called
+from the root node constructor of the class {\tt MYSUB}.
+\begin{verbatim}
+  ABA_SUB(ABA_MASTER *master,
+          double conRes, double varRes, double nnzRes,
+          bool relativeRes = true,
+          ABA_BUFFER<ABA_POOLSLOT<ABA_CONSTRAINT, ABA_VARIABLE> *> *constraints = 0,
+          ABA_BUFFER<ABA_POOLSLOT<ABA_VARIABLE, ABA_CONSTRAINT> *> *variables = 0);
+\end{verbatim}
+
+\begin{center}
+\begin{tabular}{lp{0.8\textwidth}}
+  {\tt master}       &A pointer to the corresponding master of the
+                      optimization.\\
+  {\tt conRes}       &The additional memory allocated for constraints.\\
+  {\tt varRes}       &The additional memory allocated for variables.\\
+  {\tt nnzRes}       &The additional memory allocated for nonzero
+                      elements of the constraint matrix.\\
+  {\tt relativeRes}  &If this argument is {\tt true}, then reserve space
+                      for variables, constraints, and nonzeros of
+                      the previous three arguments is given in
+                      percent of the original numbers. Otherwise,
+                      the numbers are interpreted as absolute values
+                      (casted to integer).\\
+  {\tt constraints}  &The pool slots of the initial constraints.
+                      If the value is 0, then all constraints
+                      of the default constraint pool are taken.\\
+  {\tt variables}    &The pool slots of the initial variables.
+                      If the value is 0, then all variables of the
+                      default variable pool are taken.\\
+
+\end{tabular}
+\end{center}
+
+\noindent
+The values of 
+the arguments {\tt conRes}, {\tt varRes}, and {\tt nnzRes} should only be
+good estimations. An underestimation does not cause a run time error,
+because space is reallocated internally as required. However,
+many reallocations decrease the performance. 
+An overestimation only wastes memory.
+
+In the following implementation of a constructor for the root node
+we do not specify additional memory for variables, because we suppose
+that no variables are generated dynamically. We accept the default settings of the last three arguments, as this
+is normally a good choice for many applications.
+\begin{verbatim}
+  MYSUB::MYSUB(MYMASTER *master) :
+    ABA_SUB(master, 50.0, 0.0, 100.0)
+  { }
+\end{verbatim}
+While there are some alternatives for the implementation of the
+root node for the application, the constructor of non-root nodes
+has usually the same form for all applications, but might be
+augmented with some problem specific initializations.
+\begin{verbatim}
+  MYSUB::MYSUB(ABA_MASTER *master, ABA_SUB *father, ABA_BRANCHRULE *branchRule) :
+    ABA_SUB(master, father, branchRule) 
+  {}
+\end{verbatim}
+
+\begin{center}
+\begin{tabular}{lp{0.75\textwidth}}
+  {\tt master}     &A pointer to the corresponding master of the
+                    optimization.\\
+  {\tt father}     &A pointer to the father in the enumeration tree.\\
+  {\tt branchRule} &The rule defining the subspace of the
+                    solution space associated with this node. More
+                    information about branching rules can be found
+                    in Section~\ref{section:otherBranching}. As long
+                    as you are using only the default branching on
+                    variables you do not have to know anything about
+                    the class {\tt ABA\_BRANCHRULE}.\\
+\end{tabular}
+\end{center}
+
+The root node constructor for the class {\tt MYSUB} has to be called
+from the function {\tt firstSub()} of the class {\tt MYMASTER}. The 
+constructor for non-root nodes has to be called in the function
+{\tt generateSon()} of the class {\tt MYSUB}.
+
+\subsubsection{The Feasibility Check}
+\index{ABA\_SUB@{\tt ABA\_SUB}!feasible@{\tt feasible}}
+
+After the  LP-relaxation is solved we have to check if its optimum solution
+is a feasible solution of our optimization problem. Therefore, we
+have to define the pure virtual function {\tt feasible()} in the class
+{\tt MYSUB}, which should return {\tt true} if the LP-solution is
+a feasible solution of the optimization problem, and {\tt false} otherwise:
+\begin{verbatim}
+  bool MYSUB::feasible()
+  {}
+\end{verbatim}
+\noindent
+If all constraints of the integer programming formulation are present in
+the LP-relaxation, then the LP-solution is feasible if all discrete variables
+have integer values. This check can be performed by calling the member function
+{integerFeasible()} of the base class {\tt ABA\_SUB}:
+\begin{verbatim}
+  bool MYSUB::feasible()
+  {
+    return integerFeasible();
+  }
+\end{verbatim}
+If the LP-solution is feasible and its value is better than the primal
+bound, then \ABACUS\ automatically updates the primal bound. However,
+the update of the solution itself is problem specific, i.e., this update
+has to be performed within the function {\tt feasible()}.
+
+\subsubsection{The Generation of the Sons}
+\index{ABA\_SUB@{\tt ABA\_SUB}!generateSon@{\tt generateSon}}
+
+Like the pure virtual function {\tt firstSub()} of the class {\tt ABA\_MASTER},
+which generates the root node of the \bab\ tree, we need a function
+generating a son of a subproblem. This function is required as the
+nodes of the \bab\ tree have to be identified with a problem specific
+subproblem of the class {\tt MYSUB}.
+This is performed by the pure 
+virtual function {\tt generateSon()}, which calls the constructor for
+a non-root node of the class~{\tt MYSUB} and returns a pointer to the
+newly generated subproblem. If the constructor for non-root nodes
+of the class {\tt MYSUB} has the same arguments as the corresponding
+constructor of the base class {\tt ABA\_SUB}, then the function
+{\tt generateSon()} can have the following form:
+\begin{verbatim}
+  ABA_SUB *MYSUB::generateSon(ABA_BRANCHRULE *rule)
+  {
+    return new MYSUB(master_, this, rule);
+  }
+\end{verbatim}
+This function is automatically called during a branching process. If the
+already built-in branching strategies are used, we
+do not have to care about the generation of the branching rule {\tt rule}.
+How other branching strategies can be implemented is presented in 
+Section~\ref{section:otherBranching}.
+
+\subsubsection{A Branch-and-Bound Algorithm}
+\noindent
+The two constructors, the function {\tt feasible()}, and the function
+{\tt generateSon()} must be implemented for the subproblem class of
+every application. As soon as these functions are available, a 
+\bab\ algorithm can be performed. All other functions of the
+class {\tt MYSUB} that we are going to explain now, are optional
+in order to improve the performance of the implementation.
+
+\subsubsection{The Separation}
+\index{ABA\_SUB@{\tt ABA\_SUB}!separate@{\tt separate}}
+\index{separation}
+
+Problem specific cutting planes can be generated by redefining the
+virtual dummy function {\tt separate()}. In this case, also the argument
+{\tt cutting} in the constructor of the class~{\tt ABA\_MASTER} should receive
+the value {\tt true}, otherwise the separation is skipped.
+The first step is the redefinition of the function {\tt separate()} of
+the base class {\tt ABA\_SUB}.
+\begin{verbatim}
+  int MYSUB::separate()
+  { }
+\end{verbatim}
+The function {\tt separate()} returns the number of generated constraints.
+
+We distinguish between the
+separation from scratch and the separation from a constraint pool.
+Newly generated constraints
+have to be added by the 
+function {\tt addCons()}\index{ABA\_SUB@{\tt ABA\_SUB}!addCons@{\tt addCons}} to the
+buffer of the class {\tt ABA\_SUB}, which returns the number
+of added constraints.
+Constraints generated in earlier iterations that have been become
+inactive in the meantime might be still contained in the cut pool.
+These constraints can be regenerated by calling the 
+function~{\tt constraintPoolSeparation()}, 
+which adds the constraints to the buffer without
+an explicit call of the function {\tt addCons()}.
+
+A very simple separation strategy is implemented in the following example
+of the function {\tt separate()}. Only if the pool separation fails, we
+generate new cuts from scratch. The generated constraints are 
+added with the function {\tt addCons()}
+to the internal buffer, which has a limited size. The number
+of constraints that can still be added to this buffer is returned
+by the function {\tt addConBufferSpace()}\index{ABA\_SUB@{\tt ABA\_SUB}!addConBufferSpace@{\tt addConBufferSpace}}. 
+The function {\tt mySeparate()} performs here the application specific 
+separation. If more cuts are added with the function {\tt addCons()}
+than there is space in the internal buffer for cutting planes, then
+the redundant cuts are discarded. The function {\tt addCons()} returns
+the number of actually added cuts.
+\begin{verbatim}
+  int MYSUB::separate()
+  {
+    int nCuts = constraintPoolSeparation();
+    if (!nCuts) {
+      ABA_BUFFER<ABA_CONSTRAINT*> newCuts(master_, addConBufferSpace());
+      nCuts = mySeparate(newCuts);
+      if (nCuts) nCuts = addCons(newCuts);
+    }
+    return nCuts;
+  }
+\end{verbatim}\index{ABA\_SUB@{\tt ABA\_SUB}!constraintPoolSeparation@{\tt constraintPoolSeparation}}
+Note, \ABACUS\ does not automatically check if the added constraints are really
+violated. Adding only non-violated constraints, can cause an infinite
+loop in the cutting plane algorithm, which is only left if the tailing
+off control is turned on (see Section~\ref{section:parameters}).
+
+While constraints added with the function {\tt addCons()} are usually
+allocated by the user, they are deleted by \ABACUS. They must {\bf
+  not} be deleted by the user (see Section~\ref{section:memoryManagement}).
+
+If not all constraints of the integer programming formulation are active,
+and all discrete variables have integer values,
+then the solution of a separation problem might be required to check
+the feasibility of the LP-solution. In order to avoid a redundant call
+of the same separation algorithm later in the function {\tt separate()},
+constraints can be added already here by the function {\tt addCons()}.
+
+In the following example of the function {\tt feasible()} the separation 
+is even performed if there are discrete variables with fractional values
+such that the separation routine does not have to be called a second
+time in the function {\tt separate()}.
+\begin{verbatim}
+  bool MYSUB::feasible()
+  {
+    bool feasible;
+ 
+    if (integerFeasible()) feasible = true;
+    else                   feasible = false;
+ 
+    ABA_BUFFER<ABA_CONSTRAINT*> newCuts(master_, addConBufferSpace());
+      
+    int nSep = mySeparate(newCuts);
+ 
+    if (nSep) {
+      feasible = false;
+      addCons(newCuts);
+    }
+    return feasible;
+  }
+\end{verbatim}\index{ABA\_SUB@{\tt ABA\_SUB}!feasible@{\tt feasible}}
+
+\subsubsection{Pricing out Inactive Variables}
+\index{pricing}
+\index{ABA\_SUB@{\tt ABA\_SUB}!pricing@{\tt pricing}}
+
+The dynamic generation of variables is performed very similarly to the
+separation of cutting planes. Here, the virtual function {\tt pricing()}
+has to be redefined and the argument
+{\tt pricing} in the constructor of the class {\tt ABA\_MASTER} should receive
+the value {\tt true}, otherwise the pricing is skipped.
+
+We illustrate the redefinition of the function {\tt pricing()} by an
+example that is an analogon to the example given for the function 
+{\tt separate()}.
+\begin{verbatim}
+  int MYSUB::pricing()
+  {
+    int nNewVars = variablePoolSeparation();
+    if (!nNewVars) {
+      ABA_BUFFER<ABA_VARIABLE*> newVariables(master_, addVarBufferSpace());
+      nNewVars = myPricing(newVariables);
+      if (nNewVars) nNewVars = addVars(newVariables);
+    }
+    return nNewVars;
+  }
+\end{verbatim}\index{ABA\_SUB@{\tt ABA\_SUB}!variablePoolSeparation@{\tt variablePoolSeparation}}
+
+While variables added with the function {\tt addVars()} are usually
+allocated by the user, they are deleted by \ABACUS. They must {\bf
+  not} be deleted by the user (see Section~\ref{section:memoryManagement}).
+
+\subsubsection{Primal Heuristics}
+\index{primal heuristics}
+\index{ABA\_SUB@{\tt ABA\_SUB}!improve@{\tt improve}}
+
+\noindent
+After the LP-relaxation has been solved in the subproblem optimization
+the virtual function {\tt improve()} is called. Again, the default implementation
+does nothing but in a redefinition in the derived class {\tt MYSUB} application
+specific primal heuristics can be inserted:
+\begin{verbatim}
+  int MYSUB::improve(double &primalValue)
+  { }
+\end{verbatim}
+If a better feasible solution is found its value has to be stored in {\tt primalValue}
+and the function should return 1, otherwise it should return 0.
+In this case, the value of the primal bound is updated by \ABACUS,
+whereas the solution itself has to be updated within the function
+{\tt improve()} as already explained for the function {\tt feasible()}.
+
+It is also possible to update the primal bound already within the
+function {\tt improve()} if this is more convenient to reduce internal
+bookkeeping. In the following example we apply the two problem specific
+heuristics {\tt myFirstHeuristic()} and {\tt mySecondHeuristic()}.
+After each heuristic we check if the {\tt value} of the solution
+is better than the best known one with the function call
+{\tt master\_->betterPrimal(value)}\index{ABA\_MASTER@{\tt ABA\_MASTER}!betterPrimal@{\tt betterPrimal}}. 
+If this function
+returns {\tt true} we update the value of the best known feasible solution by
+calling the function 
+{\tt master\_->primalBound()}\index{ABA\_MASTER@{\tt ABA\_MASTER}!primalBound@{\tt primalBound}}.
+\begin{verbatim}
+  int MYSUB::improve(double &primalValue) 
+  {
+    int status = 0;
+    double value;
+  
+    myFirstHeuristic(value);
+    if (master_->betterPrimal(value)) {
+      master_->primalBound(value);
+      primalValue = value;
+      status = 1;
+    }
+  
+    mySecondHeuristic(value);
+    if (master_->betterPrimal(value)) {
+      master_->primalBound(value);
+      primalValue = value;
+      status = 1;
+    }
+  
+    return status;
+  }
+\end{verbatim}
+
+\subsubsection{Accessing Important Data}
+
+\noindent
+For a complete description of all members of the class {\tt ABA\_SUB} we refer
+to the documentation in the reference manual.
+However, in most applications only a limited number
+of data is required for the implementation of problem specific functions,
+like separation or pricing functions.
+For simplification we want to state some of these members here:
+
+\noindent
+\begin{tabular}{lp{0.5\textwidth}}
+{\tt int nCon() const;}   &returns the number of active constraints.\\
+{\tt int nVar() const;}   &returns the number of active variables.\\
+{\tt ABA\_VARIABLE *variable(int i);} &returns a pointer to the {\tt i}-th active
+                                 variable.\\
+{\tt ABA\_CONSTRAINT *constraint(int i);} &returns a pointer to the {\tt i}-th active
+                                     constraint.\\
+{\tt double *xVal\_;}                &an array storing the values
+                                     of the variables after the
+                                     linear program is solved.\\
+{\tt double *yVal\_}                 &an array storing the values
+                                     of the dual variables after the
+                                     linear program is solved.\\
+\end{tabular}
+
+
+\subsection{Starting the Optimization}
+\index{optimization}
+
+After the problem specific classes are defined as discussed in the previous
+sections, the optimization can be performed with the following main
+program. We suppose that the master of our new application has as
+only parameter the name of the input file.
+\begin{verbatim}
+  #include "mymaster.h"
+  
+  int main(int argc, char **argv)
+  {
+    MYMASTER master(argv[1]);
+  
+    master.optimize();
+    return master.status();
+  }
+\end{verbatim}\index{ABA\_MASTER@{\tt ABA\_MASTER}!optimize@{\tt optimize}}

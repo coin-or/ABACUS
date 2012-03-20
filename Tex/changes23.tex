@@ -1,0 +1,30 @@
+\section{New Features of ABACUS 2.3}
+\label{section:new23}
+
+\subsection{Version macro}
+
+The include file {\tt abacusroot.h} contains now a define {\tt
+ABACUS\_VERSION} with the version number of the \ABACUS\ release. It
+is set to {\tt 230} in this release.
+
+\subsection{New classes for separation}
+
+New classes |ABA\_LPSOLUTION| for storing an LP solution and
+|ABA\_SEPARATOR| for implementing a separation procedure 
+facilitate encapsulation of the code. Moreover,
+the class |ABA\_SEPARATOR| provides
+functions for checking for duplication of generated constraints/variables.
+
+% In a  forthcoming parallization of \ABACUS by use of this class,
+% the separation can be executed on remote processors.
+
+
+\subsection{Rank for constraints/variables}
+
+A new virtual function |ABA\_CONVAR::rank()| allows to
+associate a rank with a constraint/variable.
+This rank can be used for ranking the  constraints/variables in the 
+functions |ABA\_STANDARDPOOL::separate()|,
+|ABA\_SUB::constraintPoolSeparation| and |ABA\_SUB::variablePoolSeparation()|.
+
+

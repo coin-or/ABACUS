@@ -1,0 +1,19 @@
+#include "abacus/poolslot.h"
+
+class ABA_VARIABLE;
+class ABA_CONSTRAINT;
+
+template class ABA_HASHITEM<ABA_STRING, int>;
+template class ABA_HASH<ABA_STRING, int>;
+template class ABA_HASHITEM<int, int>;
+template class ABA_HASH<int, int>;
+template class ABA_HASHITEM<ABA_STRING, ABA_STRING>;
+template class ABA_HASH<ABA_STRING, ABA_STRING>;
+template class ABA_HASHITEM<unsigned, ABA_POOLSLOT<ABA_CONSTRAINT, ABA_VARIABLE>*>;
+template class ABA_HASH<unsigned, ABA_POOLSLOT<ABA_CONSTRAINT, ABA_VARIABLE>*>;
+template class ABA_HASHITEM<unsigned, ABA_POOLSLOT<ABA_VARIABLE, ABA_CONSTRAINT>*>;
+template class ABA_HASH<unsigned, ABA_POOLSLOT<ABA_VARIABLE, ABA_CONSTRAINT>*>;
+
+template class ostream& operator<<(ostream& out, const ABA_HASHITEM<ABA_STRING, ABA_STRING> &rhs);
+template class ostream& operator<<(ostream& out, const ABA_HASH<ABA_STRING, ABA_STRING> &rhs);
+

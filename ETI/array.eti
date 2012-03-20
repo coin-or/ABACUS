@@ -1,0 +1,53 @@
+#include "abacus/vartype.h"
+#include "abacus/lpvarstat.h"
+#include "abacus/slackstat.h"
+#include "abacus/csense.h"
+
+class ABA_SPARVEC;
+class ABA_ROW;
+class ABA_FSVARSTAT;
+class ABA_ROWCON;
+class ABA_BRANCHRULE;
+class ABA_INFEASCON;
+class ABA_STRING;
+class ABA_VARTYPE;
+class ABA_VARIABLE;
+class ABA_CONSTRAINT;
+class ABA_SROWCON;
+
+template<class BaseType, class CoType> class ABA_POOLSLOT;
+template<class BaseType, class CoType> class ABA_POOLSLOTREF;
+
+template class ABA_ARRAY<int>;
+template class ABA_ARRAY<long>;
+template class ABA_ARRAY<double>;
+template class ABA_ARRAY<bool>;
+template class ABA_ARRAY<ABA_SPARVEC*>;
+template class ABA_ARRAY<ABA_ROW*>;
+template class ABA_ARRAY<ABA_LPVARSTAT*>;
+template class ABA_ARRAY<ABA_FSVARSTAT*>;
+template class ABA_ARRAY<ABA_SLACKSTAT*>;
+template class ABA_ARRAY<ABA_VARTYPE>;
+template class ABA_ARRAY<ABA_ROWCON*>;
+template class ABA_ARRAY<ABA_BRANCHRULE*>;
+template class ABA_ARRAY<ABA_INFEASCON*>;
+template class ABA_ARRAY<ABA_STRING*>;
+template class ABA_ARRAY<ABA_VARTYPE*>;
+template class ABA_ARRAY<ABA_VARIABLE*>;
+template class ABA_ARRAY<ABA_SROWCON*>;
+template class ABA_ARRAY<ABA_ARRAY<double>*>;
+template class ABA_ARRAY<ABA_BUFFER<int>*>;
+template class ABA_ARRAY<ABA_SLACKSTAT::STATUS>;
+template class ABA_ARRAY<ABA_LPVARSTAT::STATUS>;
+template class ABA_ARRAY<ABA_POOLSLOT<ABA_VARIABLE, ABA_CONSTRAINT> *>;
+template class ABA_ARRAY<ABA_POOLSLOT<ABA_CONSTRAINT, ABA_VARIABLE> *>;
+template class ABA_ARRAY<ABA_POOLSLOTREF<ABA_VARIABLE, ABA_CONSTRAINT> *>;
+template class ABA_ARRAY<ABA_POOLSLOTREF<ABA_CONSTRAINT, ABA_VARIABLE> *>;
+template class ABA_ARRAY<ABA_CSENSE::SENSE>;
+
+template class ostream& operator<<(ostream& out, const ABA_ARRAY<int> &rhs);
+template class ostream& operator<<(ostream& out, const ABA_ARRAY<long> &rhs);
+template class ostream& operator<<(ostream& out, const ABA_ARRAY<double> &rhs);
+template class ostream& operator<<(ostream& out, const ABA_ARRAY<bool> &rhs);
+template class ostream& operator<<(ostream& out, const ABA_ARRAY<ABA_VARTYPE> &rhs);
+

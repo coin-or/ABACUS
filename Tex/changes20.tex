@@ -1,0 +1,294 @@
+\section{New Features of ABACUS 2.0}
+\label{section:new20}
+
+This section summarizes all new features that have been introduced
+since the release of \ABACUS\ 1.2. 
+
+\subsection{LP-Solver Soplex}
+\index{Soplex}
+
+Besides Cplex \ABACUS\ provides now an interface to the LP-Solver
+Soplex \cite{Wun97}.
+
+If Soplex is used as LP-solver, it might be
+required to switch to the
+new include file structure (see
+Section~\ref{section:includeFilePath}) in order to avoid name
+conflicts. Both Soplex and \ABACUS\ provide include files with the
+name \texttt{timer.h}.
+
+\subsection{Naming Conventions}
+\label{section:namingConventions}
+
+The previous version did not use any prefix for all globally visible
+names in order to avoid name collisions with other libraries since the
+\CPLUSPLUS\ concept of namespaces should make this technique
+redundant. Unfortunately, it turned out that the GNU \CPLUSPLUS\
+compiler does still not support namespaces. The \GPLUSPLUS-FAQ
+mentions that even in the next release 2.8 this concept might not be
+supported.
+
+In order to provide the possibility of
+avoiding name collisions without namespaces,
+we added to all globally visible names the prefix \texttt{ABA\_}.
+There are two possibilities for reusing your old codes together with
+the new name concept. 
+
+The first method is to include the file {\tt oldnames.h} into every
+file using \ABACUS\ names without the prefix {\tt ABA\_}. 
+In the compilation the preprocessor flag 
+{\tt ABACUS\_OLD\_NAMES}\index{ABACUS\_OLD\_NAMES@{\tt ABACUS\_OLD\_NAMES}}
+must be set. With
+preprocessor definitions the old names are converted to new names. 
+You should be aware that this technique can have dangerous side
+effects. Therefore, this procedure should {\bf not} be applied if you combine
+\ABACUS\ with any other library in your application.
+
+The second method is the better method and is not much more work than
+the first one. In the {\tt tools} subdirectory of the \ABACUS\
+distribution you can find the Perl script 
+{\tt upd-names-2.0}\index{upd-names-2.0@{\tt upd-names-2.0}}.
+If you apply this script to all source files of your \ABACUS\
+application by calling
+\begin{verbatim}
+  upd-names-2.0 <files>
+\end{verbatim}
+a copy of each file given in {\tt <files>} is made in the subdirectory
+{\tt new-files} and the old names are replaced by the new names. 
+
+\subsection{Include File Path}
+\label{section:includeFilePath}
+
+Another problem are header files of different
+libraries with the same name. It can happen that due to the inclusion
+structure it is not possible to avoid these conflicts by the order 
+of the include file search paths. Therefore, every \ABACUS\ include
+file ({\tt *.h} and {\tt *.inc}) is included now from the subdirectory 
+{\tt abacus}. You can continue using the old include file structure by
+setting the preprocessor flag 
+{\tt ABACUS\_OLD\_INCLUDE}\index{ABACUS\_OLD\_INCLUDE@{\tt ABACUS\_OLD\_INCLUDE}}. Here is an
+example how an \ABACUS\ file includes other \ABACUS\ files:
+\begin{verbatim}
+#ifdef ABACUS_OLD_INCLUDE
+#include "array.h"
+#else
+#include "abacus/array.h"
+#endif
+\end{verbatim}
+We strongly recommend the use of the new include file structure.
+In combination with the LP-solver Soplex the new include file
+structure is sometimes required (it depends which \ABACUS\ and
+which Soplex files you include). There may be name conflicts since both
+systems have a file {\tt timer.h}.
+
+Due to this concept also the directory structure of the \ABACUS\
+distribution has changed. All include files are now in the
+subdirectory {\tt include/abacus}. 
+
+A conversion can be performed with the help of the Perl script 
+{\tt tools/upd-includes-2.0}\index{upd-includes-2.0@{\tt upd-includes-2.0}}.
+ Calling
+\begin{verbatim}
+  upd-includes-2.0 <files>
+\end{verbatim}
+makes a copy of all {\tt <files>} into the subdirectory 
+{\tt new-includes} and adapts them to the new include structure, e.g.,
+\begin{verbatim}
+  #include "master.h"
+\end{verbatim}
+is replaced by
+\begin{verbatim}
+  #include "abacus/master.h"
+\end{verbatim}
+in the new files.
+
+\subsection{Advanced Control of the Tailing Off Effect}
+\index{tailing off}
+
+\ABACUS\ automatically controls the tailing off effect according to the
+parameters {\tt TailOffNLps} and {\tt TailOffPercent} of the
+configuration file {\tt .abacus}. Solutions of LP-relaxations can be
+skipped in this control by calling the function {\tt
+  ignoreInTailingOff()}\index{ABA\_SUB@{\tt ABA\_SUB}!ignoreInTailingOff@{\tt ignoreInTailingOff}}
+(see Section~\ref{section:ignoreInTailingOff}).
+
+
+\subsection{Problem Specific Fathoming}
+\index{fathoming!problem specific}
+
+Problem specific fathoming criteria can be added by the redefinition 
+of the virtual function 
+{\tt ABA\_SUB::ex\-cep\-tion\-Fathom()}\index{ABA\_SUB@{\tt ABA\_SUB}!exceptionFathom@{\tt exceptionFathom}} (see
+Section~\ref{section:exceptionFathom}).
+
+\subsection{Problem Specific Branching}
+\index{branching!problem specific}
+
+A problem specific branching step can be enforced by the redefinition
+of the virtual function 
+{\tt ABA\_SUB::ex\-cep\-tion\-Branch()}\index{ABA\_SUB@{\tt ABA\_SUB}!exceptionBranch@{\tt exceptionBranch}} (see Section~\ref{section:exceptionBranch}).
+
+\subsection{Generalized Strong Branching}
+\index{strong branching}
+
+Generalized strong branching is the possibility of evaluating
+different branching rules and selecting the best ones. If
+branching on variables is performed, e.g., the first linear programs of the
+(potential) sons for various branching 
+variables are solved, in order to find the
+most promising variable. Together with the built-in branching strategies
+this feature can be controlled with the new entry 
+{\tt NBranch\-ing\-Vari\-able\-Can\-di\-dates}\index{NBranchingVariableCandidates@{\tt
+  NBranchingVariableCandidates}} of the configuration file 
+(Section~\ref{section:parameters}).
+Moreover, also other branching strategies can be evaluated as
+explained in Section~\ref{section:StrongBranching}.
+        
+
+\subsection{Pool without Constraint Duplication}
+\index{pool!without duplication}
+
+One problem in using \ABACUS\ can be the large number of generated
+constraints and variables that use a lot of memory. In order to reduce
+the memory usage we provide a new pool class 
+{\tt ABA\_NONDUPLPOOL}\index{ABA\_NONDUPLPOOL@{\tt ABA\_NONDUPLPOOL}}
+that avoids the
+multiple storage of the same constraint or variable in the same pool.
+The details are explained in Section~\ref{section:nonduplpool}.
+
+\subsection{Visual \CPLUSPLUS\ Compiler}
+\index{Visual C++@Visual \CPLUSPLUS}
+
+In addition to the GNU \CPLUSPLUS\ compiler on UNIX operating
+systems, \ABACUS\ is now also available on Windows NT in combination with
+the Visual \CPLUSPLUS\ compiler. 
+Further details for using \ABACUS\ in this new environment can be found
+in Section~\ref{chapter:installation}
+
+\subsection{Compiler Preprocessor Flag}
+\index{compiler}
+
+In the compilation of an \ABACUS-application the used compiler must be
+specified by a preprocessor flag (see Section~\ref{table:compilers}).
+
+\subsection{LP-Solver Preprocessor Flag}
+
+The LP-solvers that are used have to be specified by a preprocessor
+flag (see Section~\ref{section:lpsolver}). Also the flags for the
+LP-solver Cplex changed.
+
+\subsection{Parameters of Configuration File}
+
+Three new parameters have been added to the configuration file {\tt
+.abacus}.
+
+\subsubsection{NBranchingVariableCandidates}
+
+The parameter
+{\tt NBranchingVariableCandidates}\index{NBranchingVariableCandidates@{\tt NBranchingVariableCandidates}}
+can be
+used to control the number of tested branching variables if our
+extended strong branching\index{strong branching} concept is used (see
+Section~\ref{section:StrongBranching}).
+
+\subsubsection{DefaultLpSolver}
+
+An other new parameter is 
+{\tt DefaultLpSolver}\index{DefaultLpSolver@{\tt DefaultLpSolver}} allows
+to choose either {\tt Cplex} or {\tt Soplex} as default
+LP-solver for the solution of the LP-relaxations.
+
+\subsubsection{SoPlexRepresentation}
+
+Soplex works internally either with column or a row basis. This basis
+representation can be selected with the parameter 
+{\tt SoPlexRepresentation}\index{SoPlexRepresentation@{\tt
+    SoPlexRepresentation}}.
+Our tests show that only the row basis works stable in Soplex 1.0.
+Further details are explained in Section~\ref{section:parameters}.
+
+
+\subsection{New Functions}
+
+We implemented several new functions. Some of them might be also
+interesting for the users of \ABACUS. For the detailed documentation we
+refer to the reference manual.
+
+\begin{itemize}
+\item {\tt ABA\_BPRIOQUEUE::getMinKey()}
+\item {\tt ABA\_BHEAP::getMinKey()}
+\item {\tt bool ABA\_GLOBAL::isInteger(double x)}
+\item In addition to the function
+      \begin{verbatim}
+      void MASTER::initializePools(ABA_BUFFER<ABA_CONSTRAINT*> &constraints,
+                                   ABA_BUFFER<ABA_VARIABLE*> &Variables,
+                                   int varPoolSize,
+                                   int cutPoolSize,
+                                   bool dynamicCutPool = false);
+      \end{verbatim}
+       the function
+       \begin{verbatim}
+       void MASTER::initializePools(ABA_BUFFER<ABA_CONSTRAINT*> &constraints,
+                                    ABA_BUFFER<ABA_CONSTRAINT*> &cuts,
+                                    ABA_BUFFER<ABA_VARIABLE*> &Variables,
+                                    int varPoolSize,
+                                    int cutPoolSize,
+                                    bool dynamicCutPool = false);
+       \end{verbatim}
+       also allows the insertion of some initial cuts into the cut
+       pool.
+
+\item Manipulators for setting the width and the precision of
+      {\tt ABA\_OSTREAM} have been added that work like the
+      corresponding manipulators of the class {\tt ostream}.
+      \begin{verbatim}
+      ABA_OSTREAM_MANIP_INT setWidth(int w);
+      ABA_OSTREAM_MANIP_INT setPrecision(int p);
+      \end{verbatim}
+
+\item {\tt  ABA\_OSTREAM::setFormatFlag(fmtflags)}
+
+\item The objective function sense can be changed in the ABA\_LP
+  classes with the function
+  \begin{verbatim}
+  void ABA_LP::sense(const ABA_OPTSENSE &newSense).
+  \end{verbatim}
+
+\item The {!=} operator is now available for the class
+      {\tt  ABA\_STRING}.
+\end{itemize}
+
+\subsection{Miscellaneous}
+
+Besides some bug fixes we made many minor improvements. The most important
+ones are listed here.
+
+\begin{itemize}
+\item The output for the output levels {\tt SubProblem} and {\tt
+ LinearProgram} is formatted in a nicer way.
+\item Besides those Cplex parameters that could be directly controlled
+      by \ABACUS\ functions, it is now possible to get or to modify
+      any Cplex 4.0 and 5.0 parameter with the functions:
+      \begin{verbatim}
+      int CPLEXIF::CPXgetdblparam(int whichParam, double *value);
+      int CPLEXIF::CPXsetdblparam(int whichParam, double value);
+      int CPLEXIF::CPXgetintparam(int whichParam, int *value);
+      int CPLEXIF::CPXsetintparam(int whichParam, int value);
+      \end{verbatim}
+\item If a linear program is solved with the barrier method, then
+      usually a cross over to an optimal basic solution is
+      performed. The value of a variable in the
+      optimal solution of the barrier method before 
+      the cross over can be obtained with the function
+      {\tt double barXVal(int i)}. If this ``pre-cross over'' solution
+      is available, can be checked with the function
+      {\tt SOLSTAT barXValStatus() const}.
+
+\item The minimal required violation of a constraint or variable
+      in a pool separation or pool pricing, respectively, can be
+      specified as a parameter of the functions
+      {\tt ABA\_SUB::constraintPoolSeparation} and 
+      {\tt ABA\_SUB::variablePoolSeparation}. The minimal violation
+      is also a parameter of the function  {\tt ABA\_POOL::separate}
+      and of redefinitions of this function in derived classes.
+\end{itemize}

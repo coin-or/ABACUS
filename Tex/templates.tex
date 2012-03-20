@@ -1,0 +1,67 @@
+% $Id: templates.tex,v 2.0 2007-06-15 11:47:30 sprenger Exp $
+
+
+\section{Using the ABACUS Templates}
+\label{section:UsingTemplates}
+\index{templates}
+
+\ABACUS\ also provides several basic data structures as templates. 
+For several fundamental types and some \ABACUS\ classes the templates
+are instantiated already in the library {\tt libabacus.a}. 
+However, if you want to use one of the \ABACUS\ templates
+for one of your classes then you have to instantiate the
+templates for these classes yourself. 
+
+Moreover, in order to keep the
+library small, we instantiated the templates only for those types
+which are required in the kernel of the \ABACUS\ system. Therefore,
+it can happen that the linker complains about undefined symbols.
+In this case you have to instantiate these templates, too.
+
+\ABACUS\ allows implicit or explicit template instantiation. Implicit
+template instantiation is the more convenient way. The compiler
+automatically instantiates a template when required. Its disadvantage
+is that it increases the compile time and (depending on the compiler)
+also the size of the generated code. For explicit template
+instantiation the templates have to be collected manually in file and
+and this file has to be compiled separately. Note, some compilers do
+not support explicit template instantiation. Other compilers perform
+the explicit template instantiation automatically even if the implicit
+instantiation is selected. Currently, we recommend explicit template
+instantiation for the GNU-compiler 2.7.x and the SGI compiler and
+implicit template instantiation for the GNU-compiler 2.8.x, the SUN compiler
+and the MS Visual C++ compiler.
+
+For instance, you want to use an {\tt ABA\_ARRAY} template for your
+class {\tt MYCONSTRAINT} and the fundamental type {\tt unsigned int},
+for which we have no instantiations in the library {\tt libabacus.a}.
+Then you can instantiate explicitly the corresponding templates in a file
+{\tt myarray.cc}.
+
+\bigskip
+{\tt\obeylines
+//
+// This is the file myarray.cc.
+//
+
+\#include "abacus/array.h"       // the header of the class ABA\_ARRAY
+\#include "abacus/array.inc"     // the member functions of the class ABA\_ARRAY
+
+template class ABA\_ARRAY<MYCONSTRAINT>;
+template class ABA\_ARRAY<unsigned int>;
+
+// end of file myarray.cc
+}
+\bigskip
+
+\noindent
+The file {\tt myarray.cc} should be compiled and linked together with
+your files and the library {\tt libabacus.a}. In the file in which 
+you are using the array templates only the file {\tt array.h} should
+be included.
+
+For more information on templates we refer to the documentation of 
+the \htmladdnormallinkfoot{templates for the GNU compiler}
+        {http://funnelweb.utcc.utk.edu/\~{}harp/gnu/gcc-2.7.0/gcc\_98.html\#SEC101}.
+We prefer the method using the g++ compiler flag 
+{\tt -fno-implicit-templates}.\index{-fno-implicit-templates@{\tt -fno-implicit-templates}}

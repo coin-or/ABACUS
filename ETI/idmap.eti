@@ -1,0 +1,8 @@
+#include "abacus/sub.h"
+
+class ABA_SUB;
+template<class BaseType, class CoType> class ABA_POOLSLOT;
+
+template class ABA_IDMAP<ABA_SUB>;
+template class ABA_IDMAP<ABA_POOLSLOT<ABA_CONSTRAINT,ABA_VARIABLE> >;
+template class ABA_IDMAP<ABA_POOLSLOT<ABA_VARIABLE,ABA_CONSTRAINT> >;

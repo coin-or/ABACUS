@@ -1,0 +1,36 @@
+Changes since ABACUS 3.0
+=========================================================================
+
+BUGFIX: Makefile was not compatible with MacOSX and newer OSI versions
+BUGFIX: Added some missing #include directives
+BUGFIX: Vol can no longer be chosen as the default solver
+BUGFIX: ABA_MASTER::output() now produces output *before* (not after)
+        the timing statistics (as specified in the documentation)
+BUGFIX: Strong branching leads to abort (lp status could not be 
+        determined) if iteration limit to low. 
+BUGFIX: Branching on non-binary integer variables was flawed.
+BUGFIX: OSIIF initialization tried to read objective value from linear 
+        program that had not been solved.
+BUGFIX: OSIIF::primalSimplex() and OSIIF::dualSimplex() did not use 
+        the primal/dual simplex method, respectively, if newer
+	versions of OSI were used. 
+BUGFIX: Doxygen segfaulted due to LaTeX code in the html
+        documentation.
+BUGFIX: Fixed warnings 'deprecated conversion from string constant to 
+        ‘char*’' 
+BUGIFX: Do not complain in OSIIF if loading basis has failed
+BUGFIX: only delete ws in OSIIF when defined
+BUGFIX: Keep CPLEX license. Might cause memory leak if abacus is
+	used recursively.
+BUGFIX: several compatibility fixes for gcc >= 4.3
+BUGFIX: lp solution information is now cached (compatibility fix for
+        OSI >= 0.103).
+BUGFIX: settings in abacus config file no longer overwrite settings
+	from initializeParameters().
+
+FEATURE: master can now provide the dual root bound
+FEATURE: exception handling
+FEATURE: compiler settings for gcc >= 4.1
+FEATURE: preparations for using csdp as a solver
+
+CHANGES: -DABACUS_PARALLEL was broken and is no longer supported.

@@ -1,0 +1,4 @@
+template class ABA_RING<double>;
+
+template class ostream& operator<<(ostream&, const ABA_RING<double> &);
+

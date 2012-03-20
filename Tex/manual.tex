@@ -1,0 +1,75 @@
+% $Id: manual.tex,v 2.3 2007-08-14 09:35:07 baumann Exp $
+
+
+\documentclass[a4paper,10pt,titlepage,final]{book}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{alltt}
+\usepackage{times}
+\usepackage[ps2pdf,
+            pagebackref=true,
+            colorlinks=true,
+            linkcolor=blue
+           ]{hyperref}
+\usepackage{hyperref}
+\usepackage{pspicture}
+\usepackage{fancyheadings}
+\usepackage{doxygen}
+
+\usepackage{epsfig}
+\usepackage{html}
+
+\newcommand\transpose{{\!\scriptscriptstyle\mathrm T}}
+
+\font\abacusfont=cmssq8 scaled \magstep1
+\font\sqa=cmssq8 at 10 truept
+\def\~{\kern1pt}
+
+
+
+\hoffset=1.9truemm
+\topmargin=-0.5truecm
+\oddsidemargin=-0.25truecm
+\evensidemargin=-0.25truecm
+\textheight=22.5truecm
+\textwidth=16truecm
+\setcounter{secnumdepth}{4}
+
+\makeindex
+
+\begin{document}
+
+\include{macros}
+
+\frontmatter
+\include{title}
+\tableofcontents
+\newpage
+
+
+\mainmatter
+
+\include{introduction}
+\include{installation}
+\include{changes}
+\include{design}
+\include{basic}
+\include{advanced}
+\include{templates}
+\include{referencemanual}
+\include{warranty}
+
+\backmatter
+
+\bibliographystyle {alpha}
+\bibliography {./abacus}
+
+\printindex
+
+\end{document}
+
+
+

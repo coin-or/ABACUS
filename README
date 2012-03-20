@@ -1,0 +1,52 @@
+General Information
+===================
+
+
+This is ABACUS version 3.0 
+ABACUS is a C++ class library for
+the implementation of Branch-and-Cut-and-Price algorithms. 
+
+The official web site is:
+  http://www.informatik.uni-koeln.de/abacus
+
+The official mailing list:
+
+The mailing list is a forum for ABACUS related discussions of any
+kind. In order to subscribe please visit the url:
+
+https://lists.uni-koeln.de/mailman/listinfo/abacus-forum
+
+
+Installation & Dependencies
+===========================
+
+See the file 'INSTALL'
+
+
+How to report bugs
+==================
+
+Bugs should be reported to abacus@informatik.uni-koeln.de
+
+In the bug report please include:
+
+* Information about your system. For instance:
+
+   - What operating system and version
+   - What compiler and version
+   - What LP-solver
+   - What coin-Osi version
+   - For Linux, what version of the C library
+
+  And anything else you think is relevant. For instance:
+
+   - A log-file produced with log-level `Full'
+   - A log-file produced with option PrintLP
+
+* How to reproduce the bug. 
+
+* If the bug was a crash, the exact text that was printed out
+  when the crash occurred.
+
+* Further information such as stack traces may be useful, but
+  is not necessary.

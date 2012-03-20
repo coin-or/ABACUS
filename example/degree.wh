@@ -1,0 +1,32 @@
+@q 1996 by Stefan Thienel @>
+
+@* DEGREE.
+
+  The simplest constraints for the traveling salesman problem
+  besides the trivial inequalities
+  $0 \le x_e \le 1$, which are considered by the lower and upper
+  bounds of the variables, are the degree constraints $x(\delta(v)) = 2$
+  which require that every node |v| is incident to exactly two
+  edges. A degree constraint is uniquely determined by the corresponding
+  node. 
+
+  This class is derived from the abstract base class |ABA_CONSTRAINT|.
+
+@(degree.h@>=
+#ifndef DEGREE_H
+#define DEGREE_H
+
+#include "abacus/constraint.h"
+
+  class @[ DEGREE : @,@, public ABA_CONSTRAINT @] { @/
+    public: @/
+      DEGREE(ABA_MASTER *master, int v);
+      virtual ~DEGREE();
+      virtual double coeff(ABA_VARIABLE *v);
+
+    private: @/
+      int    node_;  // the node associated with the degree constraint
+  };
+
+#endif  // |!DEGREE_H|
+

@@ -1,0 +1,72 @@
+ABACUS Version 3.2 beta
+********************************
+
+Your help implementing new features or removing bugs is very 
+much appreciated.
+
+Release 3.2 beta is a compatibility release, mainly to
+support newer versions of the COIN Open Solver Interface 
+(OSI) and current versions of the gnu compiler suite (gcc).
+Please the file CHANGES for details.
+
+************************************
+* COIN-OSI (Open Solver Interface) *
+************************************
+
+On the matter of compatibility with the Open Solver Interface, 
+your feedback and bug reports would be especially appreciated. 
+
+ABACUS is compatible with the COIN OSI releases up to 0.100. Some 
+fundamental changes in the solution handling of COIN OSI have made 
+ABACUS incompatible with all releases that are newer than 0.100. We
+have tried to work around these issues, but we cannot guarantee that 
+the fixes work in all situations. So far, ABACUS should at least 
+work with COIN OSI 0.103. 
+
+ABACUS should also work with COIN OSI 0.105. However, the COIN OSI 
+project has decided to separate the development of the solvers
+(e.g. CLP) from the development of OSI itself. In theory, this gives
+each solver a different version of OSI and thus, there is currently 
+no clean way to link ABACUS against several different solvers at once
+with OSI >= 0.105 (deciding on the solver at compile time is
+of course still possible, though). Therefore, this procedure
+is no longer officially supported for OSI 0.105. As a workaround, 
+you can currently still link all solvers against the same OSI 
+installation, although this is not recommended by the OSI project.
+
+The recommended OSI version to use with abacus is still 0.100.
+
+(please visit https://projects.coin-or.org/Osi for further details)
+
+*************
+* Compilers *
+*************
+
+ABACUS can now be compiled with the GNU c++ compilers 3.3 - 4.4.
+
+*****************************
+* Other compatibility fixes *
+*****************************
+
+ABACUS can now be compiled on MacOS.
+
+*****************************
+* Other important changes   *
+****************************
+
+ABACUS now throws exception when an error occurs. 
+
+The processing of the b&c tree in parallel is no longer supported.
+
+*************************************
+* ABACUS Documentation with DOXYGEN *
+*************************************
+The complete documentation can also be accessed from the project website
+
+www.informatik.uni-koeln.de/abacus
+
+
+INSTALLATION
+======================
+Please read the INSTALL file in the main directory for detailed installation
+instructions.

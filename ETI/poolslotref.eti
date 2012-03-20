@@ -1,0 +1,9 @@
+class ABA_VARIABLE;
+class ABA_CONSTRAINT;
+
+template class ABA_POOLSLOTREF<ABA_VARIABLE, ABA_CONSTRAINT>;
+template class ABA_POOLSLOTREF<ABA_CONSTRAINT, ABA_VARIABLE>;
+
+template class ostream& operator<<(ostream& out, const ABA_POOLSLOTREF<ABA_CONSTRAINT, ABA_VARIABLE> &rhs);
+template class ostream& operator<<(ostream& out, const ABA_POOLSLOTREF<ABA_VARIABLE, ABA_CONSTRAINT> &rhs);
+
