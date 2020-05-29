@@ -1,317 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type = "text/xsl" href="http://www.coin-or.org/projects/autoGen.xsl"?>
-<projectData xmlns="coin-or.org"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="coin-or.org http://www.coin-or.org/projects/autoGen.xsd"> 
-
-	<!-- This file is a template that will you fill in in order to provide -->
-	<!-- specific information about your project. Once the template is     -->
-	<!-- filled in and checked into your projects repository in the conf/  -->
-	<!-- directory, it will be automatically parsed and displayed in a     -->
-	<!-- standard HTML format when users call up the file from the main    -->
-	<!-- COIN Web site. The file is extensively commented to help you      -->
-	<!-- understand where to fill in the various pieces of required        -->
-
-	<!-- information. The comments are enclosed in blocks like this one.   -->
-
-	<projectBasics>
-
-		<projectName>ABACUS</projectName>
-
-		<!-- Fill in a brief description of your project here.         -->
-		<!-- For example, for SYMPHONY, you might put:                 -->
-		<!--                                                           -->
-		<!-- <projectDescription>                                      -->
-
-		<!--    SYMPHONY is an open-source generic MILP solver,        -->
-		<!--    callable library, and extensible framework for         -->
-		<!--    implementing customized solvers for mixed-integer      -->
-		<!--    linear programs (MILPs). Blah, blah, blah.             -->
-		<!-- </projectDescription>                                     -->
-		<!--                                                           -->
-		<!-- Fill in your text below (outside the comment block)       -->
-
-		<projectDescription>
-		  ABACUS is a software system written in C++ that provides a framework for the implementation of
-		  branch-and-bound algorithms using linear programming relaxations. 
-		  Cutting planes or columns can be generated dynamically (branch-and-cut, branch-and-price,
-		  branch-and-cut-and-price).
-		</projectDescription>
-
-		<projectShortDescription>
-		  An LP-based branch-and-cut framework.
-		</projectShortDescription>
-
-		<projectManager>Frank Baumann, Mark Sprenger</projectManager>
-
-		<projectHomePage>https://projects.coin-or.org/ABACUS</projectHomePage>
-
-		<projectLicense>lesser GNU general public license</projectLicense>
-		<projectLicenseURL>http://www.gnu.org/licenses/lgpl-3.0.txt</projectLicenseURL>
-		<coinLinkedProjects>
-			<coinProject>
-				<repoName>Osi</repoName>
-			</coinProject>
-			<coinProject>
-				<repoName>Clp</repoName>
-			</coinProject>
-			<coinProject>
-				<repoName>DyLP</repoName>
-			</coinProject>
-			<coinProject>
-				<repoName>SYMPHONY</repoName>
-			</coinProject>
-			<coinProject>
-				<repoName>Vol</repoName>
-			</coinProject>
-
-		</coinLinkedProjects>
-
-		<!-- Below, you can list other packages your project           -->
-
-		<!-- either requires or can optionally link to. These are      -->
-		<!-- one by one, as in the following example:                  -->
-		<!--                                                           -->
-		<!--<otherLinkedPackages>                                      -->
-		<!--                                                           -->
-		<!--   <otherPackage>                                          -->
-		<!--      <packageName>                                        -->
-		<!--         GLPK                                              -->
-		<!--      </packageName>                                       -->
-
-		<!--      <packageURL>                                         -->
-		<!--         http://www.gnu.org/software/glpk/                 -->
-		<!--      </packageURL>                                        -->
-		<!--      <requiredOrOptional>                                 -->
-		<!--         Optional                                          -->
-		<!--      </requiredOrOptional>                                -->
-		<!--   </otherPackage>                                         -->
-		<!--                                                           -->
-		<!--   <otherPackage>                                          -->
-
-		<!--      <packageName>                                        -->
-		<!--         GNU Readline                                      -->
-		<!--      </packageName>                                       -->
-		<!--      <packageURL>                                         -->
-		<!--      </packageURL>                                        -->
-		<!--      <requiredOrOptional>                                 -->
-		<!--         Optional                                          -->
-		<!--      </requiredOrOptional>                                -->
-		<!--   </otherPackage>                                         -->
-
-		<!--                                                           -->
-		<!--   <otherPackage>                                          -->
-		<!--      <packageName>                                        -->
-		<!--         GNU History                                       -->
-		<!--      </packageName>                                       -->
-		<!--      <packageURL>                                         -->
-		<!--      </packageURL>                                        -->
-		<!--      <requiredOrOptional>                                 -->
-		<!--         Optional                                          -->
-
-		<!--      </requiredOrOptional>                                -->
-		<!--   </otherPackage>                                         -->
-		<!--                                                           -->
-		<!--</otherLinkedPackages>                                     -->
-		<!--                                                           -->
-		<!--Fill in your text below (outside the comment block).       -->
-
-                <otherLinkedPackages>
-		</otherLinkedPackages>
-
-		<projectLanguage>C++</projectLanguage>
-
-
-		<!--The following fields describe the development status       -->
-
-		<!--of the project.                                            -->
-		<!--                                                           -->
-		<!--Fill in your text below (outside the comment block).       -->
-
-		<developmentStatus>
-
-			<!--If you are actively managing your project, use     -->
-
-			<activityStatus>Active</activityStatus>
-
-			<!--The maturity level is determined during project    -->
-			<!--review and should have been reported to you.       -->
-			<!--See http://www.coin-or.org/faqs.html#q18 for       -->
-			<!--more information on maturity level.                -->
-			<!--Fill it in like this:                              -->
-			<!--                                                   -->
-			<!--<maturityLevel>5</maturityLevel>                   -->
-			<!--                                                   -->
-
-			<maturityLevel>4</maturityLevel>
-
-			<!-- Having trouble with the automated system that     -->
-			<!-- generates stable and release version numbers? If  -->
-			<!-- so, you can override one or both with these       -->
-			<!-- elements. DO NOT USE unless necessary, as it will -->
-			<!-- your responsibility to keep them up-to-date. Your -->
-			<!-- text will be used verbatim.                       -->
-
-		        <!--
-			<stableVersionNumber></stableVersionNumber>
-			<releaseNumber></releaseNumber>
-			-->
-
-		</developmentStatus>
-
-		<!--Below, you can list the platforms on which your            -->
-		<!--project has been tested. Again, these are listed one       -->
-
-		<!--by one. There are fields for both operating system and     -->
-		<!--compiler. Here is an example for SYMPHONY                  -->
-		<!--                                                           -->
-		<testedPlatforms>                                          
-		<!--                                                           -->
-		<!--   <platform>                                              -->
-		<!--      <operatingSystem>Microsoft Windows</operatingSystem> -->
-		<!--      <compiler>MSVC++/cl</compiler>                       -->
-		<!--   </platform>                                             -->
-
-		<!--                                                           -->
-		<!--   <platform>                                              -->
-		<!--      <operatingSystem>Microsoft Windows</operatingSystem> -->
-		<!--      <compiler>CYGWIN/cl</compiler>                       -->
-		<!--   </platform>                                             -->
-		<!--                                                           -->
-		<!--   <platform>                                              -->
-		<!--      <operatingSystem>Microsoft Windows</operatingSystem> -->
-		<!--      <compiler>CYGWIN/gcc</compiler>                      -->
-
-		<!--   </platform>                                             -->
-		<!--                                                           -->
-		<!--   <platform>                                              -->
-		<!--      <operatingSystem>Microsoft Windows</operatingSystem> -->
-		<!--      <compiler>MSys/gcc</compiler>                        -->
-		<!--   </platform>                                             -->
-		<!--                                                           -->
-		 <platform>                                             
-		      <operatingSystem>Linux</operatingSystem> 
-
-		      <compiler>gcc-4.1</compiler>                             
-		 </platform>                                             
-		<!--                                                           -->
-		<!--   <platform>                                              -->
-		<!--      <operatingSystem>Mac OSX</operatingSystem>           -->
-		<!--      <compiler>gcc</compiler>                             -->
-		<!--   </platform>                                             -->
-		<!--                                                           -->
-		<!--   <platform>                                              -->
-
-		<!--      <operatingSystem>Solaris x86</operatingSystem>       -->
-		<!--      <compiler>gcc</compiler>                             -->
-		<!--   </platform>                                             -->
-		<!--                                                           -->
-		<!--   <platform>                                              -->
-		<!--      <operatingSystem>Solaris x86</operatingSystem>       -->
-		<!--      <compiler>sunpro</compiler>                          -->
-		<!--   </platform>                                             -->
-		<!--                                                           -->
-
-		</testedPlatforms>					       
-		<!--                                                           -->
-		<!--Fill in your text below (outside the comment block).       -->
-
-		
-		
-		<projectCategories>
-			<!-- Start  of projectCategories block   -->
-		
-			<!--Below is the list of COIN-OR project categores.    -->
-			<!--Simply "un-comment" any categories that apply to   -->
-			<!--your project.                                      -->
-			
-			<!--   <category>                                      -->
-			<!--        Development tools                          -->
-
-			<!--    </category>                                    -->
-			<!--    <category>                                     -->
-			<!--        Graphs                                     -->
-			<!--    </category>                                    -->
-			<!--    <category>                                     -->
-			<!--        Interfaces                                 -->
-			<!--    </category>                                    -->
-			<!--    <category>                                     -->
-			<!--        Metaheuristics                             -->
-
-			<!--    </category>                                    -->
-			<!--    <category>                                     -->
-			<!--        Modeling systems                           -->
-			<!--    </category>                                    -->
-			
-			<!--    <category>                                     -->
-			<!--        Optimization convex non-differentiable     -->
-			<!--    </category>                                    -->
-			 <!--   <category>                                     -->
-			 <!--       Optimization deterministic linear continuous -->
-			<!--    </category>                                    	-->
-			
-			   <category>                                     
-			        Optimization deterministic linear discrete 
-			    </category>                                    
-			<!--    <category>                                     -->
-
-			<!--        Optimization deterministic nonlinear discrete -->
-			<!--    </category>                                    -->
-			<!--    <category>                                     -->
-			<!--        Optimization deterministic semidefinite continuous -->
-			<!--    </category>                                    -->
-			<!--    <category>                                     
-			        Optimization stochastic                    
-			    </category>                                    -->
-			<!--    <category>                                     -->
-			<!--        Optimization utility                       -->
-
-			<!--    </category>                                    -->
-			
-			<!-- End of projectCategories block                    -->
-		</projectCategories>
-		
-
-		<!-- End of projectBasics block                                -->
-
-	</projectBasics>
-
-	<!--Below, you can specify the links for the left-hand side menu.      -->
-	<!--Note that these are optional, so if there is a blank, there will   -->
-	<!--be no corresponding menu item                                      -->
-
-	<!--                                                                   -->
-	<!--For SYMPHONY, this block would look like this:                     -->
-	<!--                                                                   -->
-	<!--<leftMenuLinks>                                                    -->
-	<!--                                                                   -->
-	<!--   <documentation>                                                 -->
-	<!--      http://www.coin-or.org/SYMPHONY/man-5.1                      -->
-	<!--   </documentation>                                                -->
-	<!--                                                                   -->
-
-	<!--   <sourceCodeDownload>                                            -->
-	<!--      http://www.coin-or.org/download/source/SYMPHONY              -->
-	<!--   </sourceCodeDownload>                                           -->
-	<!--                                                                   -->
-	<!--   <binaryDownload>                                                -->
-	<!--      http://www.coin-or.org/download/binary/SYMPHONY              -->
-	<!--   </binaryDownload>                                               -->
-	<!--                                                                   -->
-	<!--   <mailingList>                                                   -->
-
-	<!--      http://list.coin-or.org/mailman/listinfo/coin-symphony       -->
-	<!--   </mailingList>                                                  -->
-	<!--</leftMenuLinks>                                                   -->
-	<!--                                                                   -->
-	<!--Fill in your text below (outside the comment block).               -->
-	<leftMenuLinks>
-		<documentation>http://www.informatik.uni-koeln.de/abacus/documentation.html</documentation>
-		<sourceCodeDownload>http://www.informatik.uni-koeln.de/abacus/download.html</sourceCodeDownload>
-		<binaryDownload></binaryDownload>
-		<mailingList>https://lists.uni-koeln.de/mailman/listinfo/abacus-forum</mailingList>
-	</leftMenuLinks>
-		
-	<!-- End of projectData block                                          -->
+<projectData xmlns="coin-or.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="coin-or.org http://www.coin-or.org/projects/autoGen.xsd">
+  <projectBasics>
+    <projectName>ABACUS</projectName>
+    <projectDescription>
+  ABACUS is a software system written in C++ that provides a framework for the implementation of
+  branch-and-bound algorithms using linear programming relaxations. 
+  Cutting planes or columns can be generated dynamically (branch-and-cut, branch-and-price,
+  branch-and-cut-and-price).
+</projectDescription>
+    <projectShortDescription>An LP-based branch-and-cut framework.</projectShortDescription>
+    <projectManager>Frank Baumann, Mark Sprenger</projectManager>
+    <projectHomePage>https://github.com/coin-or/ABACUS</projectHomePage>
+    <projectLicense>Lesser GNU general public license</projectLicense>
+    <projectLicenseURL>http://www.gnu.org/licenses/lgpl-3.0.txt</projectLicenseURL>
+    <coinLinkedProjects>
+      <coinProject>
+        <repoName>Osi</repoName>
+      </coinProject>
+      <coinProject>
+        <repoName>Clp</repoName>
+      </coinProject>
+      <coinProject>
+        <repoName>DyLP</repoName>
+      </coinProject>
+      <coinProject>
+        <repoName>SYMPHONY</repoName>
+      </coinProject>
+      <coinProject>
+        <repoName>Vol</repoName>
+      </coinProject>
+    </coinLinkedProjects>
+    <otherLinkedPackages/>
+    <projectLanguage>C++</projectLanguage>
+    <developmentStatus>
+      <activityStatus>Inactive</activityStatus>
+      <maturityLevel>4</maturityLevel>
+    </developmentStatus>
+    <testedPlatforms>
+      <platform>
+        <operatingSystem>Linux</operatingSystem>
+        <compiler>gcc-4.1</compiler>
+      </platform>
+    </testedPlatforms>
+    <projectCategories>
+      <category>Optimization deterministic linear discrete</category>
+    </projectCategories>
+  </projectBasics>
+  <leftMenuLinks>
+    <documentation>https://software.cs.uni-koeln.de/abacus/userguide/manual.html</documentation>
+    <sourceCodeDownload>https://software.cs.uni-koeln.de/abacus/download.html</sourceCodeDownload>
+    <binaryDownload/>
+    <mailingList>https://lists.uni-koeln.de/mailman/listinfo/abacus-forum</mailingList>
+  </leftMenuLinks>
 </projectData>
-
